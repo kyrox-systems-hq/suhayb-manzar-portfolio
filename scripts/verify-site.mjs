@@ -5,7 +5,7 @@ import process from 'node:process';
 
 const root = process.cwd();
 const publicDir = path.join(root, 'public');
-const expectedOrigin = 'https://suhayb-manzar-portfolio.pages.dev';
+const expectedOrigin = 'https://suhayb-manzar-portfolio.suhayb-manzar1.workers.dev';
 const htmlFiles = [
   'index.html',
   '404.html',

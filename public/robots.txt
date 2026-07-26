@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://suhayb-manzar-portfolio.pages.dev/sitemap.xml
+Sitemap: https://suhayb-manzar-portfolio.suhayb-manzar1.workers.dev/sitemap.xml

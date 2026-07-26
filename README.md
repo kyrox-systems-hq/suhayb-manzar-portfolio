@@ -10,7 +10,7 @@ A zero-dependency static portfolio for Suhayb Manzar’s freelance web-developme
 - Mailto-based enquiry flow with no data collection or backend
 - Open Graph, Twitter Card, canonical and structured metadata
 - Sitemap, robots file and branded 404 page
-- Cloudflare Pages redirects, security headers and cache rules
+- Cloudflare Workers static-asset redirects, security headers and cache rules
 - Lead tracker template, outreach playbook, proposal template and discovery checklist
 - Local and post-deployment verification script
 
@@ -31,25 +31,25 @@ npm run verify
 After deployment:
 
 ```bash
-node scripts/verify-site.mjs --base=https://suhayb-manzar-portfolio.pages.dev
+node scripts/verify-site.mjs --base=https://suhayb-manzar-portfolio.suhayb-manzar1.workers.dev
 ```
 
-## Cloudflare Pages deployment
+## Cloudflare Workers deployment
 
-The site is designed for a Git-connected Cloudflare Pages project:
+The site is deployed as a Git-connected Cloudflare Worker with static assets:
 
 - Production branch: `main`
-- Build command: none
-- Build output directory: `public`
+- Deploy command: `npx wrangler deploy`
+- Static asset directory: `public`
 - Root directory: repository root
 - Functions, databases and environment variables: none
 
-Cloudflare documents free static-asset requests, GitHub integration, custom domains, and the current Free-plan Pages limits:
+Cloudflare documents static-asset hosting, Git integration, custom domains and billing:
 
-- [Pages pricing](https://developers.cloudflare.com/pages/functions/pricing/)
-- [Git integration](https://developers.cloudflare.com/pages/configuration/git-integration/)
-- [Custom domains](https://developers.cloudflare.com/pages/configuration/custom-domains/)
-- [Free-plan limits](https://developers.cloudflare.com/pages/platform/limits/)
+- [Static assets](https://developers.cloudflare.com/workers/static-assets/)
+- [Git integration](https://developers.cloudflare.com/workers/ci-cd/builds/git-integration/)
+- [Custom domains](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/)
+- [Static-asset billing and limits](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/)
 
 ## Sales resources
 
