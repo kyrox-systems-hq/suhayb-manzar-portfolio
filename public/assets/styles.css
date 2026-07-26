@@ -230,21 +230,33 @@ button { color: inherit; }
 
 .contact-section { position: relative; overflow: hidden; background: var(--blue); color: white; }
 .contact-section::after { content: ""; position: absolute; width: 32rem; height: 32rem; right: -8rem; bottom: -16rem; border: 7rem solid rgba(255,255,255,.06); border-radius: 50%; }
-.contact-grid { position: relative; z-index: 2; display: grid; grid-template-columns: .8fr 1.2fr; gap: 4rem; align-items: start; }
+.contact-grid { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(0,.78fr) minmax(0,1.22fr); gap: 4rem; align-items: start; }
 .contact-section .lede { color: rgba(255,255,255,.72); }
-.contact-form { padding: 2rem; border: 1px solid rgba(255,255,255,.24); border-radius: var(--radius); background: rgba(10,20,70,.28); backdrop-filter: blur(10px); }
-.form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-.field { display: grid; gap: .4rem; }
-.field.full { grid-column: 1 / -1; }
-.field label { font-size: .78rem; font-weight: 800; }
-.field input, .field textarea, .field select { width: 100%; padding: .9rem 1rem; border: 1px solid rgba(255,255,255,.25); border-radius: 13px; background: rgba(255,255,255,.1); color: white; outline: none; }
-.field input::placeholder, .field textarea::placeholder { color: rgba(255,255,255,.55); }
-.field select option { color: var(--ink); }
-.field input:focus, .field textarea:focus, .field select:focus { border-color: white; box-shadow: 0 0 0 3px rgba(255,255,255,.12); }
-.field textarea { min-height: 140px; resize: vertical; }
-.form-submit { margin-top: 1rem; }
-.form-note { margin: .85rem 0 0; color: rgba(255,255,255,.62); font-size: .78rem; }
-.form-status { min-height: 1.3rem; margin: .45rem 0 0; color: white; font-size: .82rem; font-weight: 700; }
+.contact-prompt { margin: 2rem 0 0; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,.22); color: rgba(255,255,255,.72); font-size: .84rem; font-weight: 760; }
+.contact-options { display: grid; gap: .85rem; }
+.contact-route {
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr) auto;
+  gap: 1.2rem;
+  align-items: center;
+  min-height: 154px;
+  padding: 1.45rem 1.6rem;
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 24px;
+  background: rgba(10,20,70,.2);
+  color: white;
+  transition: transform .2s ease, border-color .2s ease, background .2s ease;
+}
+.contact-route:hover { transform: translateX(5px); border-color: rgba(255,255,255,.72); background: rgba(10,20,70,.3); }
+.contact-route-primary { border-color: white; background: white; color: var(--ink); box-shadow: 0 22px 60px rgba(10,20,70,.22); }
+.contact-route-primary:hover { border-color: white; background: #f8f8f5; }
+.contact-number { align-self: start; color: currentColor; font-size: .7rem; font-weight: 850; letter-spacing: .12em; opacity: .52; }
+.contact-route-copy { min-width: 0; display: grid; }
+.contact-label { margin-bottom: .22rem; font-size: .72rem; font-weight: 850; letter-spacing: .13em; text-transform: uppercase; opacity: .62; }
+.contact-route strong { overflow-wrap: anywhere; font-size: clamp(1.2rem, 2.4vw, 1.75rem); line-height: 1.15; letter-spacing: -.035em; }
+.contact-route small { margin-top: .6rem; color: currentColor; font-size: .82rem; line-height: 1.45; opacity: .66; }
+.contact-arrow { display: grid; place-items: center; width: 2.8rem; height: 2.8rem; border: 1px solid currentColor; border-radius: 50%; font-size: 1.1rem; opacity: .72; }
+.contact-expectation { max-width: 620px; margin: .35rem 0 0; color: rgba(255,255,255,.62); font-size: .78rem; line-height: 1.55; }
 
 .site-footer { padding: 2rem 0; border-top: 1px solid var(--line); }
 .footer-row { display: flex; justify-content: space-between; align-items: center; gap: 1.5rem; color: var(--muted); font-size: .82rem; }
@@ -310,8 +322,8 @@ button { color: inherit; }
   .crossword-stat { padding: .75rem; }
   .about-label { min-height: 260px; }
   .about-copy { padding: 2rem; }
-  .form-grid { grid-template-columns: 1fr; }
-  .field.full { grid-column: auto; }
+  .contact-route { min-height: 0; grid-template-columns: auto minmax(0,1fr); padding: 1.25rem; }
+  .contact-arrow { display: none; }
   .footer-row { align-items: flex-start; flex-direction: column; }
   .case-art { min-height: 390px; }
   .case-facts { grid-template-columns: 1fr; }

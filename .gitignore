@@ -1,5 +1,6 @@
 .server-*.log
 .server-*.err.log
 node_modules/
+.firebase/
 .DS_Store
 Thumbs.db

@@ -7,10 +7,10 @@ A zero-dependency static portfolio for Suhayb Manzar’s freelance web-developme
 - Responsive portfolio homepage
 - Daily Crossword Unlimited case study
 - Drasteon case study
-- Mailto-based enquiry flow with no data collection or backend
+- Direct WhatsApp and email enquiry routes with no data collection or backend
 - Open Graph, Twitter Card, canonical and structured metadata
 - Sitemap, robots file and branded 404 page
-- Cloudflare Workers static-asset redirects, security headers and cache rules
+- Firebase Hosting redirects, security headers and cache rules
 - Lead tracker template, outreach playbook, proposal template and discovery checklist
 - Local and post-deployment verification script
 
@@ -31,25 +31,27 @@ npm run verify
 After deployment:
 
 ```bash
-node scripts/verify-site.mjs --base=https://suhayb-manzar-portfolio.suhayb-manzar1.workers.dev
+node scripts/verify-site.mjs --base=https://suhayb-manzar-portfolio.web.app
 ```
 
-## Cloudflare Workers deployment
+## Firebase Hosting deployment
 
-The site is deployed as a Git-connected Cloudflare Worker with static assets:
+The production site is deployed to a dedicated Firebase Hosting project:
 
+- Firebase project: `suhayb-manzar-portfolio`
 - Production branch: `main`
-- Deploy command: `npx wrangler deploy`
-- Static asset directory: `public`
+- Automatic deployment: `.github/workflows/firebase-hosting-merge.yml`
+- Deploy command: `firebase deploy --only hosting`
+- Hosting directory: `public`
 - Root directory: repository root
 - Functions, databases and environment variables: none
 
-Cloudflare documents static-asset hosting, Git integration, custom domains and billing:
+Firebase documents no-cost static hosting, GitHub integration and custom domains:
 
-- [Static assets](https://developers.cloudflare.com/workers/static-assets/)
-- [Git integration](https://developers.cloudflare.com/workers/ci-cd/builds/git-integration/)
-- [Custom domains](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/)
-- [Static-asset billing and limits](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/)
+- [Hosting quickstart](https://firebase.google.com/docs/hosting/quickstart)
+- [Usage and quotas](https://firebase.google.com/docs/hosting/usage-quotas-pricing)
+- [GitHub integration](https://firebase.google.com/docs/hosting/github-integration)
+- [Custom domains](https://firebase.google.com/docs/hosting/custom-domain)
 
 ## Sales resources
 

@@ -5,7 +5,7 @@ import process from 'node:process';
 
 const root = process.cwd();
 const publicDir = path.join(root, 'public');
-const expectedOrigin = 'https://suhayb-manzar-portfolio.suhayb-manzar1.workers.dev';
+const expectedOrigin = 'https://suhayb-manzar-portfolio.web.app';
 const htmlFiles = [
   'index.html',
   '404.html',
@@ -46,7 +46,7 @@ async function verifyHtml(relativePath) {
   check((html.match(/<h1\b/gi) ?? []).length === 1, `${relativePath}: must contain exactly one h1`);
   check(/<main\b/i.test(html), `${relativePath}: missing main landmark`);
   check(!html.includes('\uFFFD'), `${relativePath}: contains a Unicode replacement character`);
-  check(!/suhayb\.manzar1@gmail\.com/i.test(html), `${relativePath}: contains the retired contact address`);
+  check(!/suhayb@lcmb\.co\.uk/i.test(html), `${relativePath}: contains the retired contact address`);
   check(!/\sstyle=(["'])/i.test(html), `${relativePath}: contains inline styles blocked by the production CSP`);
 
   if (!is404) {
@@ -96,6 +96,11 @@ async function verifyHtml(relativePath) {
 async function verifyLocal() {
   for (const file of htmlFiles) await verifyHtml(file);
 
+  const firebaseConfig = JSON.parse(await readFile(path.join(root, 'firebase.json'), 'utf8'));
+  check(firebaseConfig.hosting?.public === 'public', 'firebase.json must deploy the public directory');
+  check(firebaseConfig.hosting?.cleanUrls === true, 'firebase.json must enable clean URLs');
+  check(firebaseConfig.hosting?.trailingSlash === true, 'firebase.json must enforce trailing slashes');
+
   const requiredFiles = [
     '_headers',
     '_redirects',
@@ -113,10 +118,12 @@ async function verifyLocal() {
   const publicFiles = await Promise.all([
     readFile(path.join(publicDir, 'index.html'), 'utf8'),
     readFile(path.join(publicDir, 'work/daily-crossword-unlimited/index.html'), 'utf8'),
-    readFile(path.join(publicDir, 'work/drasteon/index.html'), 'utf8'),
-    readFile(path.join(publicDir, 'assets/site.js'), 'utf8')
+    readFile(path.join(publicDir, 'work/drasteon/index.html'), 'utf8')
   ]);
-  check(publicFiles.every((content) => content.includes('suhayb@lcmb.co.uk')), 'contact address is not consistent across every page and enquiry script');
+  check(publicFiles.every((content) => content.includes('suhayb.manzar1@gmail.com')), 'contact address is not consistent across every public page');
+  check(publicFiles.every((content) => !content.includes('suhayb@lcmb.co.uk')), 'retired contact address remains on a public page');
+  check(publicFiles[0].includes('https://wa.me/923086885305'), 'homepage is missing the WhatsApp contact link');
+  check(!publicFiles[0].includes('id="project-form"'), 'homepage still contains the retired enquiry form');
 
   const sitemap = await readFile(path.join(publicDir, 'sitemap.xml'), 'utf8');
   for (const route of ['/', '/work/daily-crossword-unlimited/', '/work/drasteon/']) {
@@ -154,6 +161,11 @@ async function verifyRemote(baseUrl) {
       for (const header of ['content-security-policy', 'x-content-type-options', 'referrer-policy', 'x-frame-options']) {
         check(response.headers.has(header), `live homepage is missing ${header}`);
       }
+      const homepage = await response.text();
+      check(homepage.includes('suhayb.manzar1@gmail.com'), 'live homepage is missing the current email address');
+      check(homepage.includes('https://wa.me/923086885305'), 'live homepage is missing the WhatsApp route');
+      check(!homepage.includes('id="project-form"'), 'live homepage still contains the retired enquiry form');
+      check(!homepage.includes('suhayb@lcmb.co.uk'), 'live homepage contains the retired email address');
     }
   }
 
