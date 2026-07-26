@@ -40,11 +40,12 @@ The production site is deployed to a dedicated Firebase Hosting project:
 
 - Firebase project: `suhayb-manzar-portfolio`
 - Production branch: `main`
-- Automatic deployment: `.github/workflows/firebase-hosting-merge.yml`
 - Deploy command: `firebase deploy --only hosting`
 - Hosting directory: `public`
 - Root directory: repository root
 - Functions, databases and environment variables: none
+
+The production deployment is currently run directly from the repository checkout. GitHub Actions can be connected later when Actions are available on the repository owner’s account.
 
 Firebase documents no-cost static hosting, GitHub integration and custom domains:
 
