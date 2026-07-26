@@ -1,0 +1,9 @@
+{
+  "name": "suhayb-manzar-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static web-development portfolio for Suhayb Manzar",
+  "scripts": {
+    "verify": "node scripts/verify-site.mjs"
+  }
+}
