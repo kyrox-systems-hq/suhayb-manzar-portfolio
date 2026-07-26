@@ -4,6 +4,11 @@
   "private": true,
   "description": "Static web-development portfolio for Suhayb Manzar",
   "scripts": {
-    "verify": "node scripts/verify-site.mjs"
+    "verify": "node scripts/verify-site.mjs",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^4.114.0"
   }
 }
