@@ -33,7 +33,7 @@ Anything not listed above, including additional pages, complex integrations, pai
 
 ## Commercial terms
 
-Fixed fee: £[amount]
+Project fee: [amount and currency]
 
 Deposit: 50% before work begins
 
