@@ -33,7 +33,7 @@
         "headers": [
           {
             "key": "Content-Security-Policy",
-            "value": "default-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data:; script-src 'self' 'sha256-Lf1RN70xFD7lqUrzEvTVfmtNWIqHfSZgikyb31giVpI='; style-src 'self'; upgrade-insecure-requests"
+            "value": "default-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: https://azadabeauty.com; script-src 'self' 'sha256-Lf1RN70xFD7lqUrzEvTVfmtNWIqHfSZgikyb31giVpI='; style-src 'self'; upgrade-insecure-requests"
           },
           {
             "key": "X-Content-Type-Options",
@@ -67,6 +67,19 @@
           {
             "key": "Cache-Control",
             "value": "public, max-age=3600, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "/mockups/**",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow, noarchive"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=300, must-revalidate"
           }
         ]
       }
