@@ -157,7 +157,7 @@ async function verifyLocal() {
   const euphoriaRoot = path.join(publicDir, 'mockups/euphoria-smoke-shop');
   const euphoriaFiles = [
     'index.html', 'styles.css', 'logo-fallback.js',
-    'desktop/index.html', 'mobile/index.html', 'mobile/preview.js',
+    'desktop/index.html', 'desktop/styles.css', 'mobile/index.html', 'mobile/preview.js',
     'assets/hero.webp', 'assets/store.webp', 'assets/pivot1.webp',
     'assets/pivot2.webp', 'assets/pivot3.webp', 'assets/pivot4.webp'
   ];
@@ -172,6 +172,10 @@ async function verifyLocal() {
   check(mobilePreviewScript.includes('window.setInterval(syncHeight, 500);'), 'Euphoria mobile height synchronization must not observe cross-document nodes');
 
   const euphoriaStyles = await readFile(path.join(euphoriaRoot, 'styles.css'), 'utf8');
+  const desktopPage = await readFile(path.join(euphoriaRoot, 'desktop/index.html'), 'utf8');
+  const desktopStylesPath = path.join(euphoriaRoot, 'desktop/styles.css');
+  check(desktopPage.includes('href="styles.css"'), 'Euphoria desktop route must load its desktop-only stylesheet');
+  check(await exists(desktopStylesPath), 'Euphoria desktop-only stylesheet is missing');
   const desktopStorePath = path.join(euphoriaRoot, 'assets/store-desktop.webp');
   check(await exists(desktopStorePath), 'Euphoria desktop store image is missing');
   if (await exists(desktopStorePath)) {
@@ -179,7 +183,6 @@ async function verifyLocal() {
     check(euphoriaStoreImage.size >= 100_000, 'Euphoria desktop store image is too small for wide rendering');
   }
   check(/\.store-tile\s*\{[^}]*grid-column:\s*1;[^}]*grid-row:\s*1\s*\/\s*3;/s.test(euphoriaStyles), 'Euphoria desktop mosaic does not constrain the store tile to its own column');
-  check(/\.brand-image,\s*\.store-photo\s*\{\s*display:\s*none;/s.test(euphoriaStyles), 'Euphoria desktop repeats hero imagery in later sections');
 }
 
 async function verifyRemote(baseUrl) {
