@@ -15,7 +15,7 @@ function syncHeight() {
 
 preview.addEventListener("load", () => {
   syncHeight();
-  const observer = new ResizeObserver(syncHeight);
-  observer.observe(preview.contentDocument.documentElement);
-  observer.observe(preview.contentDocument.body);
+  window.setInterval(syncHeight, 500);
 });
+
+window.addEventListener("resize", syncHeight);

@@ -166,8 +166,20 @@ async function verifyLocal() {
   }
 
   const mobilePreview = await readFile(path.join(euphoriaRoot, 'mobile/index.html'), 'utf8');
+  const mobilePreviewScript = await readFile(path.join(euphoriaRoot, 'mobile/preview.js'), 'utf8');
   check(/<iframe\b[^>]*src=["']\.\.\/["']/i.test(mobilePreview), 'Euphoria mobile route must frame the parent mock-up');
   check(mobilePreview.includes('preview.js'), 'Euphoria mobile route is missing height synchronization');
+  check(mobilePreviewScript.includes('window.setInterval(syncHeight, 500);'), 'Euphoria mobile height synchronization must not observe cross-document nodes');
+
+  const euphoriaStyles = await readFile(path.join(euphoriaRoot, 'styles.css'), 'utf8');
+  const desktopStorePath = path.join(euphoriaRoot, 'assets/store-desktop.webp');
+  check(await exists(desktopStorePath), 'Euphoria desktop store image is missing');
+  if (await exists(desktopStorePath)) {
+    const euphoriaStoreImage = await stat(desktopStorePath);
+    check(euphoriaStoreImage.size >= 100_000, 'Euphoria desktop store image is too small for wide rendering');
+  }
+  check(/\.store-tile\s*\{[^}]*grid-column:\s*1;[^}]*grid-row:\s*1\s*\/\s*3;/s.test(euphoriaStyles), 'Euphoria desktop mosaic does not constrain the store tile to its own column');
+  check(/\.brand-image,\s*\.store-photo\s*\{\s*display:\s*none;/s.test(euphoriaStyles), 'Euphoria desktop repeats hero imagery in later sections');
 }
 
 async function verifyRemote(baseUrl) {
