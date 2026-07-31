@@ -1,1 +1,0 @@
-Codex: reconstruct with rebuild_archive.py, then run unzip -t and list entries. If the archive SHA is e6c02bb676936d87512e64a39895c76e0ffa9191aef764e28465e23b060407ed and the eight expected files are present, use that archive. This marker is temporary.

@@ -12,6 +12,11 @@ const htmlFiles = [
   'work/daily-crossword-unlimited/index.html',
   'work/drasteon/index.html'
 ];
+const euphoriaRoutes = [
+  '/mockups/euphoria-smoke-shop/',
+  '/mockups/euphoria-smoke-shop/desktop/',
+  '/mockups/euphoria-smoke-shop/mobile/'
+];
 const failures = [];
 
 function check(condition, message) {
@@ -148,11 +153,26 @@ async function verifyLocal() {
   const redirects = await readFile(path.join(publicDir, '_redirects'), 'utf8');
   check(redirects.includes('/work/drasteon '), '_redirects is missing the Drasteon canonical redirect');
   check(redirects.includes('/work/daily-crossword-unlimited '), '_redirects is missing the crossword canonical redirect');
+
+  const euphoriaRoot = path.join(publicDir, 'mockups/euphoria-smoke-shop');
+  const euphoriaFiles = [
+    'index.html', 'styles.css', 'logo-fallback.js',
+    'desktop/index.html', 'mobile/index.html', 'mobile/preview.js',
+    'assets/hero.webp', 'assets/store.webp', 'assets/pivot1.webp',
+    'assets/pivot2.webp', 'assets/pivot3.webp', 'assets/pivot4.webp'
+  ];
+  for (const file of euphoriaFiles) {
+    check(await exists(path.join(euphoriaRoot, file)), `missing Euphoria mock-up file: ${file}`);
+  }
+
+  const mobilePreview = await readFile(path.join(euphoriaRoot, 'mobile/index.html'), 'utf8');
+  check(/<iframe\b[^>]*src=["']\.\.\/["']/i.test(mobilePreview), 'Euphoria mobile route must frame the parent mock-up');
+  check(mobilePreview.includes('preview.js'), 'Euphoria mobile route is missing height synchronization');
 }
 
 async function verifyRemote(baseUrl) {
   const base = baseUrl.replace(/\/$/, '');
-  const routes = ['/', '/work/daily-crossword-unlimited/', '/work/drasteon/', '/robots.txt', '/sitemap.xml'];
+  const routes = ['/', '/work/daily-crossword-unlimited/', '/work/drasteon/', ...euphoriaRoutes, '/robots.txt', '/sitemap.xml'];
 
   for (const route of routes) {
     const response = await fetch(`${base}${route}`, { redirect: 'manual' });
@@ -166,6 +186,10 @@ async function verifyRemote(baseUrl) {
       check(homepage.includes('https://wa.me/923086885305'), 'live homepage is missing the WhatsApp route');
       check(!homepage.includes('id="project-form"'), 'live homepage still contains the retired enquiry form');
       check(!homepage.includes('suhayb@lcmb.co.uk'), 'live homepage contains the retired email address');
+    }
+    if (route.startsWith('/mockups/euphoria-smoke-shop/')) {
+      check(response.headers.get('x-frame-options') === 'SAMEORIGIN', `${route}: expected SAMEORIGIN framing policy`);
+      check(response.headers.get('content-security-policy')?.includes("frame-ancestors 'self'"), `${route}: CSP does not permit the same-origin mobile wrapper`);
     }
   }
 

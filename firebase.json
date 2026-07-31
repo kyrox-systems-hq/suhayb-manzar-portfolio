@@ -82,6 +82,19 @@
             "value": "public, max-age=300, must-revalidate"
           }
         ]
+      },
+      {
+        "source": "/mockups/euphoria-smoke-shop/**",
+        "headers": [
+          {
+            "key": "Content-Security-Policy",
+            "value": "default-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'; object-src 'none'; img-src 'self' data: https://euphoriasmokeshop.com; script-src 'self'; style-src 'self' 'unsafe-inline'; upgrade-insecure-requests"
+          },
+          {
+            "key": "X-Frame-Options",
+            "value": "SAMEORIGIN"
+          }
+        ]
       }
     ]
   }

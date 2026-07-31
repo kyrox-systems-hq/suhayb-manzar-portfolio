@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Euphoria Smoke Shop Mobile Mock-up</title>
+  <style>
+    html, body { margin: 0; min-height: 100%; background: #deded8; }
+    .mobile-preview-shell { display: flex; justify-content: center; min-height: 100vh; padding: 24px 12px; box-sizing: border-box; }
+    iframe { display: block; width: 390px; max-width: 100%; min-height: 100vh; border: 0; background: #080b09; overflow: hidden; }
+    @media (max-width: 470px) {
+      body { background: #080b09; }
+      .mobile-preview-shell { padding: 0; }
+      iframe { width: 100vw; max-width: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="mobile-preview-shell">
+    <iframe id="mobile-preview" src="../" title="Euphoria Smoke Shop mobile homepage mock-up" scrolling="no"></iframe>
+  </main>
+  <script src="preview.js"></script>
+</body>
+</html>
