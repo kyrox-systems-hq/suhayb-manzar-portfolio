@@ -1,0 +1,1 @@
+Do not use the stale SHA in earlier messages. Reconstruct the archive and accept SHA e6c02bb676936d87512e64a39895c76e0ffa9191aef764e28465e23b060407ed only if zip integrity and the exact eight expected entries pass.
