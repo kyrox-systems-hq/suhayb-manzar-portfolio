@@ -428,14 +428,7 @@ html_path = OUT / "euphoria-mobile-homepage-live-assets.html"
 html_path.write_text(html_doc, encoding="utf-8")
 (OUT / "asset-manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
-from playwright.sync_api import sync_playwright
-
-with sync_playwright() as p:
-    browser = p.chromium.launch(args=["--font-render-hinting=none"])
-    page = browser.new_page(viewport={"width": 486, "height": 900}, device_scale_factor=2)
-    page.goto(html_path.resolve().as_uri(), wait_until="networkidle")
-    page.screenshot(path=str(OUT / "euphoria-mobile-homepage-live-assets.png"), full_page=True)
-    browser.close()
-
+# Rendering is done locally after the artifact is downloaded. The remote job only
+# retrieves and packages the exact live-site assets and the HTML that references them.
 shutil.make_archive("euphoria-live-assets-mockup", "zip", OUT)
 print(json.dumps({"products": products, "store_image": store_url, "output": str(OUT)}, indent=2))
