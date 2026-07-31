@@ -175,6 +175,9 @@ async function verifyLocal() {
   const desktopPage = await readFile(path.join(euphoriaRoot, 'desktop/index.html'), 'utf8');
   const desktopStylesPath = path.join(euphoriaRoot, 'desktop/styles.css');
   check(desktopPage.includes('href="styles.css"'), 'Euphoria desktop route must load its desktop-only stylesheet');
+  const desktopCategoryImages = [...desktopPage.matchAll(/<img\s+class="category-art"\s+src="([^"]+)"/g)].map((match) => match[1]);
+  check(desktopCategoryImages.length === 4, 'Euphoria desktop department cards must include four catalogue images');
+  check(desktopCategoryImages.every((url) => url.startsWith('https://euphoriasmokeshop.com/cdn/shop/files/')), 'Euphoria desktop department cards must use CSP-permitted Euphoria catalogue imagery');
   check(await exists(desktopStylesPath), 'Euphoria desktop-only stylesheet is missing');
   const desktopStorePath = path.join(euphoriaRoot, 'assets/store-desktop.webp');
   check(await exists(desktopStorePath), 'Euphoria desktop store image is missing');
