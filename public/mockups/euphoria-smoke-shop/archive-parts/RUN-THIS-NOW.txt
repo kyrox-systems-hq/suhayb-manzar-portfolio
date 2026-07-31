@@ -1,0 +1,15 @@
+python - <<'PY'
+from pathlib import Path
+import base64, hashlib, zipfile
+root=Path('public/mockups/euphoria-smoke-shop/archive-parts')
+out=root.parent/'euphoria-revised-mockup-source.zip'
+raw=base64.b64decode(''.join(p.read_text().strip() for p in sorted(root.glob('part-*.b64'))), validate=True)
+sha=hashlib.sha256(raw).hexdigest()
+assert sha=='e6c02bb676936d87512e64a39895c76e0ffa9191aef764e28465e23b060407ed', sha
+out.write_bytes(raw)
+expected=['index.html','styles.css','assets/hero.webp','assets/store.webp','assets/pivot1.webp','assets/pivot2.webp','assets/pivot3.webp','assets/pivot4.webp']
+with zipfile.ZipFile(out) as z:
+    assert z.namelist()==expected, z.namelist()
+    assert z.testzip() is None
+print(out, sha)
+PY
