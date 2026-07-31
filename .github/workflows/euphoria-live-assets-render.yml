@@ -11,7 +11,7 @@ permissions:
 jobs:
   render:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
     steps:
       - name: Check out branch
         uses: actions/checkout@v4
@@ -21,16 +21,13 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install renderer dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests beautifulsoup4 playwright
-          python -m playwright install --with-deps chromium
+      - name: Install extraction dependencies
+        run: pip install requests beautifulsoup4
 
-      - name: Build mock-up from live Euphoria assets
+      - name: Download live Euphoria assets and build HTML
         run: python .github/scripts/euphoria_live_assets_render.py
 
-      - name: Upload mock-up files
+      - name: Upload verified asset bundle
         uses: actions/upload-artifact@v4
         with:
           name: euphoria-live-assets-mockup
