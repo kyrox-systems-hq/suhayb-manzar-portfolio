@@ -1,0 +1,31 @@
+name: Deploy Euphoria mockup to Firebase Hosting
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "public/mockups/euphoria-smoke-shop/**"
+      - "firebase.json"
+      - ".github/workflows/firebase-hosting-euphoria.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: firebase-hosting-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out portfolio
+        uses: actions/checkout@v4
+
+      - name: Deploy live Firebase Hosting site
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_SUHAYB_MANZAR_PORTFOLIO }}"
+          projectId: suhayb-manzar-portfolio
+          channelId: live
