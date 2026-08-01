@@ -1,3 +1,9 @@
+document.querySelectorAll('.brand img').forEach((image) => {
+  const markLoaded = () => image.parentElement.classList.add('logo-loaded');
+  if (image.complete && image.naturalWidth > 0) markLoaded();
+  else image.addEventListener('load', markLoaded, { once: true });
+});
+
 const menuButton = document.querySelector('.menu-button');
 const siteNav = document.querySelector('.site-nav');
 const quoteModal = document.getElementById('quote-modal');
