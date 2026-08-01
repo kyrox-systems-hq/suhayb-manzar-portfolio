@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GOFETCH — Interactive Treat Puzzle</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="announcement">Free delivery on orders over €50&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;14-day EU returns&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;Tracked delivery</div>
+<header class="header">
+  <nav class="nav" aria-label="Primary"><a href="#">Shop</a><a href="#">Dogs</a><a href="#">Cats</a><a href="#">GOFetch Tips</a></nav>
+  <a href="#" class="wordmark">GOFETCH</a>
+  <div class="actions"><button class="icon-btn">Search</button><button class="bag">Bag&nbsp;&nbsp;0</button></div>
+</header>
+<main>
+<section class="hero">
+  <div class="gallery">
+    <div class="thumbs">
+      <button class="thumb active" data-src="assets/product-1.webp" aria-label="Lifestyle image"><img src="assets/product-1.webp" alt="Dog playing with the GOFetch treat puzzle"></button>
+      <button class="thumb" data-src="assets/product-2.webp" aria-label="Product image"><img src="assets/product-2.webp" alt="Treat puzzle product"></button>
+      <button class="thumb" data-src="assets/product-3.jpg" aria-label="How it works image"><img src="assets/product-3.jpg" alt="How to use the toy"></button>
+    </div>
+    <div class="main-image"><img id="mainProductImage" src="assets/product-1.webp" alt="Dog playing with the interactive treat puzzle"><div class="image-caption">Interactive feeding, rethought</div></div>
+  </div>
+  <div class="product-panel">
+    <p class="breadcrumb">Home / Dog toys / Interactive play</p>
+    <p class="kicker">Interactive treat puzzle</p>
+    <h1>More than a treat. A job for their brain.</h1>
+    <p class="sub">A wobbling food dispenser that turns kibble or treats into an engaging game, helping curious dogs stay occupied and fast eaters slow down.</p>
+    <div class="rating"><span class="stars">★★★★★</span><span>5.0 from 3 early customer reviews</span></div>
+    <div class="price">€16.99</div>
+    <div class="tax">Tax included. Shipping calculated at checkout.</div>
+
+    <div class="field">
+      <div class="field-head"><span class="label">Colour</span><span class="field-note" id="colourName">Teal / Yellow</span></div>
+      <div class="swatches"><button class="swatch teal active" data-colour="Teal / Yellow" aria-label="Teal and yellow"><span></span></button><button class="swatch red" data-colour="Red / Black" aria-label="Red and black"><span></span></button></div>
+    </div>
+
+    <div class="field">
+      <div class="field-head"><span class="label">Choose quantity</span><span class="field-note">Three toys qualify for free delivery</span></div>
+      <div class="bundle-list">
+        <button class="bundle active" data-price="16.99"><span class="bundle-name">Single</span><span class="bundle-price">€16.99</span><span class="bundle-flag">Start here</span></button>
+        <button class="bundle" data-price="33.98"><span class="bundle-name">Pair</span><span class="bundle-price">€33.98</span><span class="bundle-flag">Two dogs or two rooms</span></button>
+        <button class="bundle" data-price="50.97"><span class="bundle-name">Trio</span><span class="bundle-price">€50.97</span><span class="bundle-flag">Free delivery</span></button>
+      </div>
+      <div class="shipping-box">
+        <div class="shipping-top"><span id="shippingText">You are €33.01 away from free delivery.</span><span id="shippingFigure">€16.99 / €50</span></div>
+        <div class="meter"><span id="meterFill"></span></div>
+      </div>
+    </div>
+
+    <button class="add">Add to bag — <span id="buttonPrice">€16.99</span></button>
+    <div class="micro">
+      <div><strong>Processing</strong><span>Orders processed in 1–3 business days.</span></div>
+      <div><strong>Ireland delivery</strong><span>Typically 7–15 business days.</span></div>
+      <div><strong>Returns</strong><span>14-day EU right of withdrawal.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section statement">
+  <div class="statement-copy">
+    <div class="section-index">01 / Why it works</div>
+    <h2>Built for brains, not just bites.</h2>
+    <p>The toy rewards nudging, rolling and problem-solving, giving mealtime more purpose while stretching out every handful of treats.</p>
+    <ul class="benefit-list">
+      <li><b>01</b><span>Turns feeding into active mental enrichment.</span></li>
+      <li><b>02</b><span>Encourages fast eaters to slow their pace.</span></li>
+      <li><b>03</b><span>Adjustable openings control how quickly treats fall.</span></li>
+      <li><b>04</b><span>Unscrews for easier filling and cleaning.</span></li>
+    </ul>
+  </div>
+  <div class="product-art"><img src="assets/product-2.webp" alt="GOFetch interactive treat puzzle"></div>
+</section>
+
+<section class="section how">
+  <div class="how-image"><img src="assets/product-3.jpg" alt="Four-step guide showing how to use the treat puzzle"></div>
+  <div class="how-copy">
+    <div class="section-index">02 / Simple by design</div>
+    <h2>Fill it. Set the challenge. Let them work.</h2>
+    <p>No complicated set-up. Add your dog’s usual kibble or favourite treats, adjust the dispensing opening, then let the wobbling shape do the rest.</p>
+    <div class="steps">
+      <div class="step"><b>01</b><span>Unscrew the top and add food or treats.</span></div>
+      <div class="step"><b>02</b><span>Adjust the opening to suit the size of the reward.</span></div>
+      <div class="step"><b>03</b><span>Place it on the floor and let your dog nudge, roll and chase.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section reviews">
+  <div class="reviews-head"><div><div class="section-index">03 / Early customer feedback</div><h2>Useful on the days the weather says no.</h2></div><div class="review-count">Three verified-on-site customer reviews</div></div>
+  <div class="review-grid">
+    <article class="review"><div class="review-stars">★★★★★</div><div class="quote">“A brilliant boredom killer for rainy afternoons.”</div><div class="reviewer">Emily</div></article>
+    <article class="review"><div class="review-stars">★★★★★</div><div class="quote">“It completely slows his eating down to a healthy pace.”</div><div class="reviewer">Alex</div></article>
+    <article class="review"><div class="review-stars">★★★★★</div><div class="quote">“It unscrews easily, so you can actually wash it properly.”</div><div class="reviewer">Eithne</div></article>
+  </div>
+</section>
+
+<section class="section bundle-section">
+  <div class="bundle-section-head"><div><div class="section-index">04 / Make the delivery threshold work</div><h2>One for now. Three for free delivery.</h2></div><p>The product is inexpensive enough to try, while a clear multi-toy option gives multi-dog homes a practical route to the €50 free-delivery threshold.</p></div>
+  <div class="bundle-cards">
+    <article class="bcard"><div class="bcard-tag">Single toy</div><h3>Try it first</h3><p>One puzzle for one dog, one feeding area or a first trial.</p><div class="bcard-price">€16.99<small>Delivery calculated at checkout</small></div></article>
+    <article class="bcard"><div class="bcard-tag">Two toys</div><h3>Keep one ready</h3><p>A practical option for two dogs or separate feeding spaces.</p><div class="bcard-price">€33.98<small>€16.02 away from free delivery</small></div></article>
+    <article class="bcard featured"><div class="bcard-tag">Three toys</div><h3>Unlock free delivery</h3><p>Three individual toys take the basket above GOFetch’s €50 threshold.</p><div class="bcard-price">€50.97<small>Free delivery</small></div></article>
+  </div>
+</section>
+</main>
+<footer class="footer"><div class="footer-inner"><div><div class="wordmark">GOFETCH</div><p>Made for your pets, vetted by mine. Quality pet supplies for happier, healthier routines.</p></div><div class="footer-links"><a href="#">Delivery</a><a href="#">Returns</a><a href="#">Contact</a><a href="#">Privacy</a></div></div></footer>
+<script src="script.js"></script>
+</body>
+</html>
