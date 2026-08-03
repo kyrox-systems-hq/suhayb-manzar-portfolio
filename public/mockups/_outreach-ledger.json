@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "purpose": "Persistent exclusion and status ledger for automated research-led web outreach runs.",
-  "updated_at": "2026-08-03T15:04:00+05:00",
+  "updated_at": "2026-08-03T15:45:00+05:00",
   "entries": [
     {
       "business_name": "Patch & Bagel",
@@ -110,10 +110,10 @@
       "source_post_url": "https://community.shopify.com/t/need-feedback-3-months-w-zero-online-sales/647276",
       "source_platform": "Shopify Community",
       "first_researched_at": "2026-08-03",
-      "status": "researched",
+      "status": "built",
       "rejection_reason": null,
       "mockup_slug": "try-it-on-boutique",
-      "notes": "Qualified manual recovery prospect. Owner reports three months with zero online sales. Focus should be a size-confidence homepage opening and representative product-page buying area built around XS-5X, virtual try-on and personal styling."
+      "notes": "Responsive homepage concept committed under public/mockups/try-it-on-boutique/. It addresses the oversized hero, delayed products, hidden fit proposition, unclear size availability, underused personal styling service, trust gaps and first-visit mobile friction. Firebase deployment and live-route verification remain pending."
     },
     {
       "business_name": "Casa Carlini",
