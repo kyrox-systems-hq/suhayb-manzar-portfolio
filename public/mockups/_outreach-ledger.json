@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "purpose": "Persistent exclusion and status ledger for automated research-led web outreach runs.",
+  "updated_at": "2026-08-03T09:00:00+05:00",
+  "entries": [
+    {
+      "business_name": "Patch & Bagel",
+      "domain": "patchandbagel.com",
+      "owner_or_contact": null,
+      "contact_email": null,
+      "source_post_url": null,
+      "source_platform": null,
+      "first_researched_at": null,
+      "status": "completed",
+      "mockup_slug": "patchandbagel",
+      "notes": "Existing project mock-up. Permanently exclude from future opportunity runs."
+    },
+    {
+      "business_name": "Nexo Doors",
+      "domain": "nexodoors.co.uk",
+      "owner_or_contact": "David",
+      "contact_email": "hello@nexodoors.co.uk",
+      "source_post_url": "https://www.reddit.com/r/reviewmyshopify/comments/1v4k662/please_help_me_critique_my_store/",
+      "source_platform": "Reddit",
+      "first_researched_at": "2026-08-01",
+      "status": "completed",
+      "mockup_slug": "nexo-doors",
+      "notes": "Existing project mock-up and outreach email. Permanently exclude."
+    },
+    {
+      "business_name": "Euphoria Smoke Shop",
+      "domain": "euphoriasmokeshop.com",
+      "owner_or_contact": null,
+      "contact_email": null,
+      "source_post_url": null,
+      "source_platform": null,
+      "first_researched_at": null,
+      "status": "completed",
+      "mockup_slug": "euphoria-smoke-shop",
+      "notes": "Existing project mock-up. Permanently exclude."
+    },
+    {
+      "business_name": "Azada Beauty",
+      "domain": "azadabeauty.com",
+      "owner_or_contact": null,
+      "contact_email": null,
+      "source_post_url": "https://community.shopify.com/t/seeking-honest-feedback-on-azada-beauty-s-mobile-store-and-product-page/658282",
+      "source_platform": "Shopify Community",
+      "first_researched_at": "2026-07-30",
+      "status": "completed",
+      "mockup_slug": "azada-beauty",
+      "notes": "Existing project mock-up. Permanently exclude."
+    },
+    {
+      "business_name": "NaptimeNeeds",
+      "domain": "naptimeneeds.com",
+      "owner_or_contact": null,
+      "contact_email": "naptimeneeds@gmail.com",
+      "source_post_url": null,
+      "source_platform": null,
+      "first_researched_at": "2026-07-30",
+      "status": "researched",
+      "mockup_slug": null,
+      "notes": "Previously identified and researched opportunity. Exclude to prevent recycling."
+    },
+    {
+      "business_name": "GOFetch",
+      "domain": null,
+      "owner_or_contact": null,
+      "contact_email": null,
+      "source_post_url": null,
+      "source_platform": null,
+      "first_researched_at": null,
+      "status": "researched",
+      "mockup_slug": null,
+      "notes": "Previously discussed opportunity in this project. Exclude from future automated runs."
+    },
+    {
+      "business_name": "Simple Safety",
+      "domain": null,
+      "owner_or_contact": null,
+      "contact_email": null,
+      "source_post_url": null,
+      "source_platform": null,
+      "first_researched_at": "2026-08-01",
+      "status": "completed",
+      "mockup_slug": null,
+      "notes": "Previously completed opportunity in this project. Exclude from future automated runs."
+    }
+  ]
+}
