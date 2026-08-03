@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "purpose": "Persistent exclusion and status ledger for automated research-led web outreach runs.",
-  "updated_at": "2026-08-03T14:58:00+05:00",
+  "updated_at": "2026-08-03T15:04:00+05:00",
   "entries": [
     {
       "business_name": "Patch & Bagel",
@@ -92,12 +92,42 @@
       "domain": "mastermindchina.com",
       "owner_or_contact": "Adrian Lu (Shopify Community handle: AdrianLu)",
       "contact_email": null,
+      "email_source_url": null,
       "source_post_url": "https://community.shopify.com/t/feedback-requested-cultural-craft-shopify-store-for-ou-kiln-celadon-and-chinese-gifts/657438",
       "source_platform": "Shopify Community",
       "first_researched_at": "2026-08-03",
-      "status": "built",
+      "status": "rejected",
+      "rejection_reason": "no_verified_email",
       "mockup_slug": "mastermind-china",
-      "notes": "New qualified prospect. Focused homepage concept committed under public/mockups/mastermind-china/. It addresses homepage clarity, buyer-language, shopper-intent navigation, product naming and collection filtering. Firebase deployment and live-route verification remain pending. No direct public email or physical business location was verified."
+      "notes": "Rejected despite a concept having been built because no exact public email address was verified. Permanently exclude."
+    },
+    {
+      "business_name": "Try it On Boutique",
+      "domain": "tryitonboutique.com",
+      "owner_or_contact": "Shopify Community handle: Tryiton",
+      "contact_email": "Support@tryitonboutique.com",
+      "email_source_url": "https://www.tryitonboutique.com/policies/contact-information",
+      "source_post_url": "https://community.shopify.com/t/need-feedback-3-months-w-zero-online-sales/647276",
+      "source_platform": "Shopify Community",
+      "first_researched_at": "2026-08-03",
+      "status": "researched",
+      "rejection_reason": null,
+      "mockup_slug": "try-it-on-boutique",
+      "notes": "Qualified manual recovery prospect. Owner reports three months with zero online sales. Focus should be a size-confidence homepage opening and representative product-page buying area built around XS-5X, virtual try-on and personal styling."
+    },
+    {
+      "business_name": "Casa Carlini",
+      "domain": "casacarlini.com",
+      "owner_or_contact": "Charles Carlini, Founder and Publisher",
+      "contact_email": "charles@casacarlini.com",
+      "email_source_url": "https://casacarlini.com/blogs/news/from-exile-to-immortality-casa-carlini-announces-simply-nabokov-for-fall-2026",
+      "source_post_url": "https://community.shopify.com/t/store-review-requested-looking-for-feedback-to-improve-conversions-for-my-independent-book-publisher/651401",
+      "source_platform": "Shopify Community",
+      "first_researched_at": "2026-08-03",
+      "status": "researched",
+      "rejection_reason": null,
+      "mockup_slug": "casa-carlini",
+      "notes": "Qualified manual recovery prospect. Founder explicitly wants stronger direct-site conversion versus Amazon. Focus should be one flagship product-page template showing why this edition, look-inside content, editorial proof, format clarity and the value of buying direct."
     }
   ]
 }
