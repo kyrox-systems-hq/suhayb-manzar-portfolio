@@ -26,17 +26,17 @@ const cover=document.querySelector('.book-cover');
 const stage=document.querySelector('.cover-stage');
 
 if(cover&&stage){
+  const stableCover='https://books.google.com/books/content?id=hFx0tAEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api';
   const loaded=()=>stage.classList.remove('image-failed');
   const failed=()=>stage.classList.add('image-failed');
 
-  if(cover.complete){
-    cover.naturalWidth?loaded():failed();
-  }else{
-    cover.addEventListener('load',loaded,{once:true});
-    cover.addEventListener('error',failed,{once:true});
-  }
+  stage.classList.add('image-failed');
+  cover.referrerPolicy='no-referrer';
+  cover.addEventListener('load',loaded,{once:true});
+  cover.addEventListener('error',failed,{once:true});
+  cover.src=stableCover;
 
   window.setTimeout(()=>{
     if(!cover.naturalWidth)failed();
-  },2500);
+  },3500);
 }
