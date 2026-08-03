@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "purpose": "Persistent exclusion and status ledger for automated research-led web outreach runs.",
-  "updated_at": "2026-08-03T09:00:00+05:00",
+  "updated_at": "2026-08-03T14:12:00+05:00",
   "entries": [
     {
       "business_name": "Patch & Bagel",
@@ -86,6 +86,18 @@
       "status": "completed",
       "mockup_slug": null,
       "notes": "Previously completed opportunity in this project. Exclude from future automated runs."
+    },
+    {
+      "business_name": "Mastermind China",
+      "domain": "mastermindchina.com",
+      "owner_or_contact": "Adrian Lu (Shopify Community handle: AdrianLu)",
+      "contact_email": null,
+      "source_post_url": "https://community.shopify.com/t/feedback-requested-cultural-craft-shopify-store-for-ou-kiln-celadon-and-chinese-gifts/657438",
+      "source_platform": "Shopify Community",
+      "first_researched_at": "2026-08-03",
+      "status": "building",
+      "mockup_slug": "mastermind-china",
+      "notes": "New qualified prospect. Fresh owner-led request dated 2026-07-26. Homepage and collection clarity, buyer-language, trust and browsing issues are being addressed in a focused homepage concept. Direct public email and business location not yet verified."
     }
   ]
 }
