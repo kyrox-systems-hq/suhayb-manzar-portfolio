@@ -84,6 +84,15 @@
         ]
       },
       {
+        "source": "/mockups/mastermind-china/**",
+        "headers": [
+          {
+            "key": "Content-Security-Policy",
+            "value": "default-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: https://mastermindchina.com https://www.mastermindchina.com https://cdn.shopify.com https://cdn.shopifycdn.net; connect-src 'self' https://mastermindchina.com https://www.mastermindchina.com; script-src 'self'; style-src 'self'; upgrade-insecure-requests"
+          }
+        ]
+      },
+      {
         "source": "/mockups/euphoria-smoke-shop/**",
         "headers": [
           {
