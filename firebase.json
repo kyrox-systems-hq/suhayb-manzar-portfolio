@@ -111,6 +111,15 @@
         ]
       },
       {
+        "source": "/mockups/tinynest/**",
+        "headers": [
+          {
+            "key": "Content-Security-Policy",
+            "value": "default-src 'self'; base-uri 'none'; form-action 'self' mailto:; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: https://tinynest144.myshopify.com https://cdn.shopify.com https://cdn.shopifycdn.net; connect-src 'self'; script-src 'self'; style-src 'self'; upgrade-insecure-requests"
+          }
+        ]
+      },
+      {
         "source": "/mockups/mastermind-china/**",
         "headers": [
           {
