@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "purpose": "Persistent exclusion and status ledger for automated research-led web outreach runs.",
-  "updated_at": "2026-08-04T09:52:00+05:00",
+  "updated_at": "2026-08-04T14:38:00+05:00",
   "entries": [
     {
       "business_name": "Patch & Bagel",
@@ -198,6 +198,20 @@
       "rejection_reason": null,
       "mockup_slug": "lylo-watch-co",
       "notes": "Responsive conversion-led homepage concept committed under public/mockups/lylo-watch-co/. It keeps the Legacy 40MM as the hero, moves Tanner's genuine founder story and buying proof closer to the decision, and positions jewellery as a secondary finishing layer. Local audit passed at 1440 x 1000 and 390 x 844 with no horizontal overflow; gallery and mobile navigation interactions passed. Firebase deployment and live-route verification remain pending."
+    },
+    {
+      "business_name": "Tinynest",
+      "domain": "tinynest144.myshopify.com",
+      "owner_or_contact": "Shopify Community handle: Tinynest; official store contact published as Samira Swais email account",
+      "contact_email": "swaisamira59@gmail.com",
+      "email_source_url": "https://tinynest144.myshopify.com/policies/contact-information",
+      "source_post_url": "https://community.shopify.com/t/i-launched-my-store-but-ilaunched-my-shopify-store-but-getting-no-sales-looking-for-feedback-and-advice/657411",
+      "source_platform": "Shopify Community",
+      "first_researched_at": "2026-08-04",
+      "status": "built",
+      "rejection_reason": null,
+      "mockup_slug": "tinynest",
+      "notes": "Recent zero-sales request with explicit interest in help. Responsive conversion-led Tinynest Baby Carrier product-page concept committed under public/mockups/tinynest/. It replaces the vague and cluttered opening with a clear product proposition, current price, published multi-buy and shipping offers, support route, genuine product assets, policy links and a focused one-product buying journey. Local audit passed at 1440 x 1000 and 390 x 844 with no horizontal overflow; gallery and mobile navigation interactions passed. Firebase deployment and live-route verification remain pending."
     }
   ]
 }
