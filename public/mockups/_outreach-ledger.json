@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "purpose": "Persistent exclusion and status ledger for automated research-led web outreach runs.",
-  "updated_at": "2026-08-05T09:20:00+05:00",
+  "updated_at": "2026-08-05T09:58:00+05:00",
   "entries": [
     {
       "business_name": "Patch & Bagel",
@@ -222,10 +222,10 @@
       "source_post_url": "https://community.shopify.com/t/feedback-on-christmasshop24/651751",
       "source_platform": "Shopify Community",
       "first_researched_at": "2026-08-05",
-      "status": "building",
+      "status": "built",
       "rejection_reason": null,
       "mockup_slug": "christmas-shop-24",
-      "notes": "Qualified after the contact gate. Recent zero-sales and checkout-abandonment request with around 500 weekly visits. Selected intervention: a personalised Santa decoration product page that brings personalisation, delivery expectations, workshop provenance and buying reassurance into one clear purchase flow."
+      "notes": "Qualified after the contact gate. Responsive conversion-led Personalised Santa Name Decoration product-page concept committed under public/mockups/christmas-shop-24/. It brings wording entry, spelling review, quantity, current delivery information, UK-made detail and the no-follow-up-email process into one clear purchase flow. Local audit passed at 1440 x 1000 and 390 x 844 with no horizontal overflow; personalisation, quantity, accordion and mobile navigation interactions passed; the approved branded fallback prevents broken imagery if the official Shopify asset is unavailable. Firebase deployment and live-route verification remain pending."
     }
   ]
 }
