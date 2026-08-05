@@ -120,6 +120,15 @@
         ]
       },
       {
+        "source": "/mockups/christmas-shop-24/**",
+        "headers": [
+          {
+            "key": "Content-Security-Policy",
+            "value": "default-src 'self'; base-uri 'none'; form-action 'self' mailto:; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: https://christmasshop24.com https://www.christmasshop24.com https://cdn.shopify.com https://cdn.shopifycdn.net; connect-src 'self'; script-src 'self'; style-src 'self'; upgrade-insecure-requests"
+          }
+        ]
+      },
+      {
         "source": "/mockups/mastermind-china/**",
         "headers": [
           {
