@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "purpose": "Persistent exclusion and status ledger for automated research-led web outreach runs.",
-  "updated_at": "2026-08-04T14:38:00+05:00",
+  "updated_at": "2026-08-05T09:20:00+05:00",
   "entries": [
     {
       "business_name": "Patch & Bagel",
@@ -212,6 +212,20 @@
       "rejection_reason": null,
       "mockup_slug": "tinynest",
       "notes": "Recent zero-sales request with explicit interest in help. Responsive conversion-led Tinynest Baby Carrier product-page concept committed under public/mockups/tinynest/. It replaces the vague and cluttered opening with a clear product proposition, current price, published multi-buy and shipping offers, support route, genuine product assets, policy links and a focused one-product buying journey. Local audit passed at 1440 x 1000 and 390 x 844 with no horizontal overflow; gallery and mobile navigation interactions passed. Firebase deployment and live-route verification remain pending."
+    },
+    {
+      "business_name": "Christmas Shop 24",
+      "domain": "christmasshop24.com",
+      "owner_or_contact": "Eugenio Ceriello / Shopify Community handle: ChristmasShop24",
+      "contact_email": "info@christmasshop24.com",
+      "email_source_url": "https://www.christmasshop24.com/pages/contact",
+      "source_post_url": "https://community.shopify.com/t/feedback-on-christmasshop24/651751",
+      "source_platform": "Shopify Community",
+      "first_researched_at": "2026-08-05",
+      "status": "building",
+      "rejection_reason": null,
+      "mockup_slug": "christmas-shop-24",
+      "notes": "Qualified after the contact gate. Recent zero-sales and checkout-abandonment request with around 500 weekly visits. Selected intervention: a personalised Santa decoration product page that brings personalisation, delivery expectations, workshop provenance and buying reassurance into one clear purchase flow."
     }
   ]
 }
