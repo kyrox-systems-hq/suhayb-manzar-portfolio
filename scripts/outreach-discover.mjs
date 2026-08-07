@@ -291,6 +291,28 @@ function dedupeAndExclude(records, ledger, config) {
   return accepted.slice(0, config.campaign.discovery_pool_target);
 }
 
+function validateResponseFreshness(response, config, technology) {
+  const policy = config.builtwith.freshness ?? {};
+  const ageHeader = response.headers.get('age');
+  if (ageHeader != null && Number.isFinite(Number(ageHeader))) {
+    const ageSeconds = Number(ageHeader);
+    if (ageSeconds > Number(policy.max_response_age_seconds_if_reported ?? 3600)) {
+      throw new Error(`BuiltWith response for ${technology} reports Age=${ageSeconds}s, exceeding the configured cache-age limit.`);
+    }
+  }
+
+  const dateHeader = response.headers.get('date');
+  if (dateHeader) {
+    const responseDate = new Date(dateHeader).valueOf();
+    if (Number.isFinite(responseDate)) {
+      const ageHours = Math.max(0, (Date.now() - responseDate) / 3600000);
+      if (ageHours > Number(policy.max_response_date_age_hours_if_reported ?? 2)) {
+        throw new Error(`BuiltWith response for ${technology} has a Date header ${ageHours.toFixed(2)} hours old, exceeding the configured freshness limit.`);
+      }
+    }
+  }
+}
+
 async function fetchBuiltWithPage({ apiKey, technology, config, offset }) {
   const params = new URLSearchParams();
   params.set('KEY', apiKey);
@@ -320,6 +342,7 @@ async function fetchBuiltWithPage({ apiKey, technology, config, offset }) {
     }
   });
   if (!response.ok) throw new Error(`BuiltWith request failed for ${technology}: ${response.status} ${response.statusText}`);
+  validateResponseFreshness(response, config, technology);
 
   const payload = await response.text();
   let data;
@@ -343,14 +366,15 @@ async function fetchBuiltWithPage({ apiKey, technology, config, offset }) {
       response_cache_control: response.headers.get('cache-control'),
       response_etag: response.headers.get('etag'),
       payload_sha256: sha256(payload),
-      no_cache_requested: true
+      no_cache_requested: true,
+      response_freshness_gate_passed: true
     }
   };
 }
 
 async function discoverFromApi(config) {
   const apiKey = process.env.BUILTWITH_API_KEY;
-  if (!apiKey) fail('BUILTWITH_API_KEY is not set. Supply --input=<BuiltWith JSON export> or set the environment variable.');
+  if (!apiKey) fail('BUILTWITH_API_KEY is not set. Supply --input=<BuiltWith JSON export> for testing only or set the environment variable for a production pull.');
 
   const records = [];
   const pages = [];
@@ -370,6 +394,7 @@ async function discoverFromApi(config) {
     records,
     provenance: {
       type: 'BuiltWith Lists API',
+      live_api: true,
       api_pages: pages
     }
   };
@@ -395,6 +420,7 @@ async function discoverFromInput(inputPath, config) {
     records,
     provenance: {
       type: 'BuiltWith export',
+      live_api: false,
       imported_at: new Date().toISOString(),
       source_file_name: path.basename(absolute),
       source_file_modified_at: fileStat.mtime.toISOString(),
@@ -437,13 +463,16 @@ if (selected.length < config.campaign.qualified_target) {
 const outputFile = path.join(campaignDir, '01-discovered.json');
 const preferredFresh = selected.filter((record) => record.builtwith_freshness_tier === 'preferred').length;
 const fallbackFresh = selected.filter((record) => record.builtwith_freshness_tier === 'fallback').length;
+const productionEligible = discovery.provenance.live_api === true;
 
 await writeJson(outputFile, {
-  schema_version: 3,
+  schema_version: 4,
   campaign_week: week,
   retrieval_run_id: retrievalRunId,
   generated_at: new Date().toISOString(),
-  source: args.input ? 'BuiltWith export' : 'BuiltWith Lists API',
+  source: discovery.provenance.type,
+  production_eligible: productionEligible,
+  production_ineligibility_reason: productionEligible ? null : 'production_requires_fresh_authenticated_builtwith_lists_api_pull',
   source_provenance: discovery.provenance,
   freshness_policy: config.builtwith.freshness,
   requested_pool: config.campaign.discovery_pool_target,
@@ -455,3 +484,4 @@ await writeJson(outputFile, {
 });
 
 console.log(`Wrote ${selected.length} fresh, commercially filtered, non-duplicate prospects to ${path.relative(cwd, outputFile)}`);
+if (!productionEligible) console.log('This discovery file is test/import mode and is not production-eligible without an authenticated live BuiltWith API pull.');
