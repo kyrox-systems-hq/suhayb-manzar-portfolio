@@ -1,6 +1,6 @@
 # Stage 5: Current Cold-Email Theory Review
 
-Serial: WEBLEADS-STAGE5-20260807-001
+Serial: WEBLEADS-STAGE5-20260808-002
 
 ## Objective
 
@@ -17,6 +17,21 @@ Write:
 - `outreach/campaigns/<week>/05-email-standard.md`
 
 Do not draft the 25 prospect sequences in this stage.
+
+## Freshness requirement
+
+This review is a weekly campaign input, not permanent boilerplate.
+
+At the top of `05-email-standard.md`, include:
+
+```text
+Reviewed: YYYY-MM-DD
+Review-ID: WEBLEADS-EMAIL-<week>-<unique-suffix>
+```
+
+The review date must be current. Campaign preflight rejects a theory review older than seven days.
+
+Stage 6 must copy both the `Reviewed` date and `Review-ID` into `06-sequences.json`. If the theory standard changes after the sequence file is written, the sequences must be re-confirmed or rewritten before preflight can pass.
 
 ## Research priorities
 
@@ -77,7 +92,7 @@ The final standard must define:
 - deliverability safeguards
 - scheduling rules
 
-Cite the sources used.
+Cite the sources used. Use at least two credible current source URLs, and use regulator sources for legal/compliance rules where relevant.
 
 The governing principle is:
 
