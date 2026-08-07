@@ -12,6 +12,6 @@
     "outreach:validate": "node scripts/outreach-validate.mjs",
     "outreach:schedule": "node scripts/outreach-schedule.mjs",
     "outreach:ledger-sync": "node scripts/outreach-ledger-sync.mjs",
-    "outreach:test": "node scripts/test-outreach-system-v2.mjs"
+    "outreach:test": "node scripts/test-outreach-system-v3.mjs"
   }
 }
