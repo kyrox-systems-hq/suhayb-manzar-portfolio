@@ -126,6 +126,11 @@ async function verifyPreflight(dir) {
   if (sourcePreflight.passed !== true) fail('Source freshness preflight has not passed.');
   if (campaignPreflight.passed !== true) fail('Campaign preflight has not passed.');
 
+  const testMode = process.env.OUTREACH_TEST_MODE === '1';
+  if (!testMode && (sourcePreflight.test_mode === true || sourcePreflight.production_source_eligible !== true)) {
+    fail('Scheduling is blocked because the source preflight was produced from test/import data. Run a fresh authenticated BuiltWith Lists API discovery for production.');
+  }
+
   const discoveryFile = path.join(dir, '01-discovered.json');
   const liveCheckedFile = path.join(dir, '01-live-checked.json');
   if (!(await exists(discoveryFile)) || !(await exists(liveCheckedFile))) fail('Discovery/live-check source files are missing after source preflight.');
@@ -145,7 +150,7 @@ async function verifyPreflight(dir) {
     const current = await digest(file);
     if (campaignPreflight.source_hashes?.[label] !== current) fail(`${label} stage changed after campaign preflight. Re-run npm run outreach:validate.`);
   }
-  return { sourcePreflight, campaignPreflight };
+  return { sourcePreflight, campaignPreflight, testMode };
 }
 
 function assignInitialDate(week, holidays, dailyCapacity, maxPerDay) {
@@ -164,7 +169,7 @@ function assignInitialDate(week, holidays, dailyCapacity, maxPerDay) {
 const week = parseWeek(process.argv.slice(2));
 const config = await readJson(path.join(cwd, 'outreach', 'config.json'));
 const campaignDir = path.join(cwd, 'outreach', 'campaigns', week);
-const { sourcePreflight, campaignPreflight } = await verifyPreflight(campaignDir);
+const { sourcePreflight, campaignPreflight, testMode } = await verifyPreflight(campaignDir);
 const sequenceFile = path.join(campaignDir, '06-sequences.json');
 const sequenceData = await readJson(sequenceFile);
 const sequences = sequenceData.sequences ?? [];
@@ -219,12 +224,14 @@ if (messages.length !== expectedMessages || campaignPreflight.expected_messages 
 
 const manifestFile = path.join(campaignDir, '07-send-manifest.json');
 await writeJson(manifestFile, {
-  schema_version: 4,
+  schema_version: 5,
   campaign_week: week,
   generated_at: new Date().toISOString(),
   provider_status: 'not_loaded',
   sender_mailbox: null,
   reply_aware_provider_required: true,
+  test_mode: testMode,
+  production_ready_manifest: !testMode && sourcePreflight.production_source_eligible === true,
   source_preflight_verified: true,
   source_preflight_generated_at: sourcePreflight.generated_at,
   production_source_eligible: sourcePreflight.production_source_eligible,
