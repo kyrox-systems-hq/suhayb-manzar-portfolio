@@ -1,16 +1,17 @@
-# Stage 2: Qualification and Contact Gate
+# Stage 2: Qualification, Freshness and Contact Gate
 
-Serial: WEBLEADS-STAGE2-20260807-002
+Serial: WEBLEADS-STAGE2-20260808-003
 
 ## Objective
 
-Turn the Stage 1 discovery pool into exactly 25 prospects worth paying implementation effort for.
+Turn the fresh Stage 1 pool into exactly 25 prospects worth paying implementation effort for.
 
 Read:
 
 - `outreach/config.json`
 - `public/mockups/_outreach-ledger.json`
 - `outreach/campaigns/<week>/01-discovered.json`
+- `outreach/campaigns/<week>/01-live-checked.json`
 
 Write:
 
@@ -18,13 +19,30 @@ Write:
 
 Do not build a mock-up and do not write outreach in this stage.
 
+Start from `01-live-checked.json`. Never substitute an older candidate list.
+
 ## Evaluate candidates until exactly 25 pass
+
+### Freshness and live-business gate
+
+For each serious candidate:
+
+- preserve the BuiltWith `last_detected_at`, discovery age and freshness tier
+- open the current website in a browser on desktop and mobile
+- follow any redirect and confirm the final storefront/business identity
+- if the deterministic live check was blocked, timed out or rate-limited, resolve it manually in the browser
+- record a fresh browser verification timestamp
+- confirm the business is actively trading and the relevant ecommerce surface is currently accessible
+
+The browser/site verification used for final qualification must be no older than the configured `qualification.live_site_check_max_age_hours` at campaign preflight.
+
+Reject stale, abandoned, parked, sold, redirected-to-an-excluded-business or unverifiable candidates.
 
 ### Commercial credibility
 
-Verify that each store is live, active and plausibly within the intended commercial range. Cross-check BuiltWith estimates where useful using current catalogue activity, advertising, traffic evidence, LinkedIn headcount, company filings, social activity and the live technology stack.
+Verify that each store is active and plausibly within the intended commercial range. Cross-check BuiltWith estimates where useful using current catalogue activity, active advertising, traffic evidence, LinkedIn headcount, company filings, social activity and current marketing technology.
 
-BuiltWith revenue and employee values are estimates and must never be presented as verified turnover or headcount.
+BuiltWith revenue, employee and technology-spend values are estimates. Never present them as verified turnover, headcount or spend.
 
 ### Website opportunity
 
@@ -41,6 +59,8 @@ A prospect cannot qualify without an exact email address explicitly published in
 Accepted sources include the official website, official company profile, company filing, verified social profile, recognised business directory or the person's own public post.
 
 Never infer, guess or pattern-generate an address.
+
+Open the email source during this stage and record when it was checked. Do not rely on an old email copied from BuiltWith metadata or an earlier campaign without re-verifying the public source.
 
 Prefer a founder, owner, ecommerce lead, marketing lead or relevant decision-maker. An official business inbox may be used where appropriate.
 
@@ -82,7 +102,7 @@ Calculate `weighted_score` using `outreach/config.json`.
 
 ```json
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "campaign_week": "YYYY-MM-DD",
   "prospects": [
     {
@@ -92,6 +112,14 @@ Calculate `weighted_score` using `outreach/config.json`.
       "location": "",
       "timezone": "IANA timezone",
       "builtwith_signals": {},
+      "builtwith_last_detected_at": "ISO timestamp",
+      "builtwith_last_detected_age_days_at_discovery": 0,
+      "builtwith_freshness_tier": "preferred|fallback",
+      "live_site_checked_at": "ISO timestamp",
+      "live_site_status": "active",
+      "live_site_final_url": "https://...",
+      "live_site_final_domain": "",
+      "live_site_evidence_urls": ["https://..."],
       "commercial_verification_notes": "",
       "primary_website_problem": "",
       "problem_evidence": [],
@@ -100,6 +128,7 @@ Calculate `weighted_score` using `outreach/config.json`.
       "recipient_role": "",
       "contact_email": "",
       "email_source_url": "https://...",
+      "contact_email_verified_at": "ISO timestamp",
       "compliance_status": "eligible",
       "compliance_basis": "",
       "compliance_evidence_urls": ["https://..."],
@@ -144,4 +173,4 @@ npm run outreach:ledger-sync -- --week=<week>
 
 This persists both qualified and rejected candidates in `public/mockups/_outreach-ledger.json` so they cannot be reconsidered later.
 
-Do not proceed to Stage 3 until the file contains exactly 25 qualified prospects and the ledger sync succeeds.
+Do not proceed to Stage 3 until the file contains exactly 25 qualified prospects, every freshness/contact gate is evidenced and the ledger sync succeeds.
