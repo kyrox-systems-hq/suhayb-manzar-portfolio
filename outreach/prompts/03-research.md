@@ -1,6 +1,6 @@
 # Stage 3: Prospect Research and Commercial Diagnosis
 
-Serial: WEBLEADS-STAGE3-20260807-001
+Serial: WEBLEADS-STAGE3-20260807-002
 
 ## Objective
 
@@ -18,9 +18,9 @@ Do not write outreach emails yet.
 
 ## Research each business
 
-Inspect the original website and relevant pages on desktop and mobile.
+Inspect the current website and relevant pages on desktop and mobile.
 
-Research only what can improve the commercial diagnosis:
+Research only what improves the commercial diagnosis:
 
 - business model
 - positioning
@@ -37,67 +37,52 @@ Research only what can improve the commercial diagnosis:
 - current company developments
 - recipient role and responsibilities where publicly evidenced
 
-Collect source URLs for factual claims.
+Keep source URLs for factual claims and preserve the evidence in the dossier.
 
-## Dossier structure
+## Diagnosis
 
-For every prospect state:
+For each prospect choose exactly one primary commercial problem and exactly one conversion surface.
 
-### Primary commercial problem
+Explain:
 
-Choose exactly one.
+- what is visibly weak
+- the evidence supporting that conclusion
+- why it may matter commercially without inventing conversion rates or lost revenue
+- what the mock-up should change
+- which genuine public business assets can safely be used
+- two to four distinct observations that can later support different email touches
 
-### Evidence
+Valid conversion surfaces include homepage, product page, collection page, paid-ad landing page, booking flow, quote request and lead-generation page.
 
-Explain what is visibly wrong or commercially weak.
+## Exact output contract
 
-### Why it matters
+`03-dossiers.json` must use this structure:
 
-Describe the likely commercial consequence without inventing conversion rates, lost revenue or unsupported financial claims.
+```json
+{
+  "schema_version": 1,
+  "campaign_week": "YYYY-MM-DD",
+  "dossiers": [
+    {
+      "business_name": "",
+      "domain": "",
+      "primary_commercial_problem": "",
+      "evidence": [""],
+      "source_urls": ["https://..."],
+      "why_it_matters": "",
+      "chosen_conversion_surface": "",
+      "intervention_hypothesis": "",
+      "genuine_assets_available": [""],
+      "outreach_relevant_observations": ["", ""]
+    }
+  ]
+}
+```
 
-### Chosen conversion surface
-
-Choose exactly one:
-
-- homepage
-- product page
-- collection page
-- paid-ad landing page
-- booking flow
-- quote request
-- lead-generation page
-- another clearly justified surface
-
-### Intervention hypothesis
-
-Describe what the mock-up should change and why.
-
-### Genuine assets available
-
-Record only assets that can be safely used:
-
-- official logo
-- genuine product imagery
-- genuine prices
-- published claims
-- genuine policies
-- genuine reviews
-- official addresses
-- official photography
-
-### Outreach-relevant observations
-
-Record two to four genuinely useful observations that could later support different email touches.
-
-These are research notes, not drafted emails.
+The dossier array must contain exactly the same 25 domains as `02-qualified.json`.
 
 ## Quality gate
 
-Reject and replace a prospect if deep research reveals that:
+Reject and replace a prospect if deeper research reveals that the problem is not meaningful, the business is weaker than qualification suggested, factual evidence cannot support a credible intervention, or the contact/compliance basis is no longer sound.
 
-- the problem is not meaningful
-- the business is weaker than qualification suggested
-- factual evidence cannot support a credible intervention
-- the contact or compliance basis is no longer sound
-
-Keep the campaign at 25 qualified prospects.
+If a replacement is required, return to Stage 2, record the rejection, qualify a replacement, sync the ledger, and then regenerate the 25-domain dossier set. Never allow the campaign to drop below 25 or allow Stage 3 to contain a different domain set from Stage 2.
