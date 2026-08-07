@@ -25,7 +25,7 @@ async function writeJson(file, value) {
 
 async function runProvider(configFile, expectedSuccess = true) {
   const result = await new Promise((resolve) => {
-    const child = spawn('node', ['scripts/outreach-provider-preflight.mjs', `--week=${week}`, `--config=${configFile}`], {
+    const child = spawn('node', ['scripts/outreach-provider-full-preflight.mjs', `--week=${week}`, `--config=${configFile}`], {
       cwd: root,
       env: { ...process.env, OUTREACH_TEST_MODE: '1' },
       stdio: ['ignore', 'pipe', 'pipe']
@@ -44,7 +44,7 @@ async function runProvider(configFile, expectedSuccess = true) {
 
 function validProvider() {
   return {
-    schema_version: 1,
+    schema_version: 2,
     provider_name: 'Synthetic Reply-Aware Provider',
     sender_mailbox: 'sender@example.com',
     sender_display_name: 'Suhayb Manzar',
@@ -63,7 +63,9 @@ function validProvider() {
       stop_on_opt_out: true,
       manual_pause: true,
       idempotent_import_or_send: true,
-      delivery_status_export: true
+      delivery_status_export: true,
+      physical_address_footer: true,
+      unsubscribe_mechanism: true
     },
     integration_test: {
       test_recipient: 'internal-test@example.com',
@@ -73,6 +75,8 @@ function validProvider() {
       reply_stop_verified: true,
       bounce_stop_verified: true,
       opt_out_stop_verified: true,
+      physical_address_verified: true,
+      unsubscribe_verified: true,
       sent_history_verified: true
     }
   };
@@ -138,9 +142,19 @@ try {
   await writeJson(configFile, missingCapability);
   await runProvider(configFile, false);
 
+  const missingFooter = validProvider();
+  missingFooter.capabilities.physical_address_footer = false;
+  await writeJson(configFile, missingFooter);
+  await runProvider(configFile, false);
+
   const staleIntegration = validProvider();
   staleIntegration.integration_test.tested_at = new Date(Date.now() - 31 * 86400000).toISOString();
   await writeJson(configFile, staleIntegration);
+  await runProvider(configFile, false);
+
+  const missingUnsubscribeVerification = validProvider();
+  missingUnsubscribeVerification.integration_test.unsubscribe_verified = false;
+  await writeJson(configFile, missingUnsubscribeVerification);
   await runProvider(configFile, false);
 
   await writeJson(configFile, validProvider());
