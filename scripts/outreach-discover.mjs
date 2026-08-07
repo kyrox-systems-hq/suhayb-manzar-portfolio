@@ -1,4 +1,5 @@
-import { readFile, writeFile, mkdir, access } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, access, stat } from 'node:fs/promises';
+import { createHash, randomUUID } from 'node:crypto';
 import path from 'node:path';
 import process from 'node:process';
 
@@ -73,6 +74,10 @@ function epochToIso(value) {
   return new Date(n * 1000).toISOString();
 }
 
+function sha256(value) {
+  return createHash('sha256').update(value).digest('hex');
+}
+
 function clamp01(value) {
   return Math.max(0, Math.min(1, value));
 }
@@ -92,9 +97,53 @@ function centreScore(value, min, max) {
   return 1 - Math.abs(n - mid) / half;
 }
 
-function daysSince(iso) {
-  if (!iso) return 9999;
-  return Math.max(0, (Date.now() - new Date(iso).valueOf()) / 86400000);
+function ageDays(iso, nowMs = Date.now()) {
+  if (!iso) return null;
+  const timestamp = new Date(iso).valueOf();
+  if (!Number.isFinite(timestamp)) return null;
+  return (nowMs - timestamp) / 86400000;
+}
+
+function freshnessStatus(record, config, nowMs = Date.now()) {
+  const policy = config.builtwith.freshness ?? {};
+  const age = ageDays(record.last_detected_at, nowMs);
+  if (age == null) {
+    return {
+      eligible: policy.require_last_detected !== true,
+      age_days: null,
+      tier: 'unknown',
+      reason: 'missing_last_detected'
+    };
+  }
+
+  const futureSkewHours = Math.max(0, -age * 24);
+  if (futureSkewHours > Number(policy.max_future_clock_skew_hours ?? 24)) {
+    return {
+      eligible: false,
+      age_days: Math.round(age * 100) / 100,
+      tier: 'invalid',
+      reason: 'last_detected_in_future'
+    };
+  }
+
+  const nonNegativeAge = Math.max(0, age);
+  const maxAge = Number(policy.max_last_detected_age_days ?? 30);
+  if (nonNegativeAge > maxAge) {
+    return {
+      eligible: false,
+      age_days: Math.round(nonNegativeAge * 100) / 100,
+      tier: 'stale',
+      reason: 'last_detected_too_old'
+    };
+  }
+
+  const preferred = Number(policy.preferred_last_detected_age_days ?? 14);
+  return {
+    eligible: true,
+    age_days: Math.round(nonNegativeAge * 100) / 100,
+    tier: nonNegativeAge <= preferred ? 'preferred' : 'fallback',
+    reason: null
+  };
 }
 
 function preliminaryScore(record, config) {
@@ -102,7 +151,8 @@ function preliminaryScore(record, config) {
   const revenue = centreScore(record.estimated_monthly_revenue_usd, bw.revenue_usd_monthly.min, bw.revenue_usd_monthly.max);
   const spend = logScale(record.estimated_monthly_tech_spend_usd, bw.technology_spend_usd_monthly.min, Math.max(5000, bw.technology_spend_usd_monthly.min * 50));
   const employees = centreScore(record.estimated_employees, bw.employees.min, bw.employees.max);
-  const recency = clamp01(1 - daysSince(record.last_detected_at) / 90);
+  const maxFreshnessAge = Math.max(1, Number(bw.freshness?.max_last_detected_age_days ?? 30));
+  const recency = clamp01(1 - Math.max(0, Number(record.builtwith_last_detected_age_days ?? maxFreshnessAge)) / maxFreshnessAge);
   const traffic = record.page_rank && Number(record.page_rank) > 0 ? clamp01(1 - Math.log10(Number(record.page_rank)) / 8) : 0.25;
   const sku = logScale(record.sku_count, bw.sku_min, 5000);
   return Math.round(100 * (0.30 * revenue + 0.20 * spend + 0.15 * employees + 0.15 * recency + 0.10 * traffic + 0.10 * sku)) / 10;
@@ -124,7 +174,7 @@ function getNextOffset(data) {
 function normalizeBuiltWithResult(raw, technology, config) {
   const meta = raw.META ?? raw.Meta ?? raw.meta ?? {};
   const country = normalizeCountry(meta.Country ?? raw.Country);
-  return {
+  const record = {
     business_name: meta.CompanyName ?? null,
     domain: normalizeDomain(raw.D ?? raw.Domain ?? raw.domain),
     country,
@@ -150,13 +200,22 @@ function normalizeBuiltWithResult(raw, technology, config) {
     initial_problem_signal: null,
     commercial_activity_note: null,
     preliminary_commercial_score: 0,
+    builtwith_last_detected_age_days: null,
+    builtwith_freshness_tier: null,
     config_snapshot: {
       revenue_range: config.builtwith.revenue_usd_monthly,
       employee_range: config.builtwith.employees,
       technology_spend_range: config.builtwith.technology_spend_usd_monthly,
-      sku_min: config.builtwith.sku_min
+      sku_min: config.builtwith.sku_min,
+      freshness: config.builtwith.freshness
     }
   };
+
+  const freshness = freshnessStatus(record, config);
+  record.builtwith_last_detected_age_days = freshness.age_days;
+  record.builtwith_freshness_tier = freshness.tier;
+  record.builtwith_freshness_rejection_reason = freshness.reason;
+  return record;
 }
 
 function withinRange(value, range) {
@@ -173,6 +232,7 @@ function meetsCommercialFilters(record, config) {
   if (!withinRange(record.estimated_employees, config.builtwith.employees)) return false;
   if (!withinRange(record.estimated_monthly_tech_spend_usd, config.builtwith.technology_spend_usd_monthly)) return false;
   if (config.builtwith.sku_min != null && Number(record.sku_count || 0) < config.builtwith.sku_min) return false;
+  if (!freshnessStatus(record, config).eligible) return false;
   return true;
 }
 
@@ -180,14 +240,12 @@ function buildExclusions(ledger) {
   const domains = new Set();
   const names = new Set();
   const emails = new Set();
-  const sourceUrls = new Set();
   for (const entry of ledger.entries ?? []) {
     if (entry.domain) domains.add(normalizeDomain(entry.domain));
     if (entry.business_name) names.add(String(entry.business_name).trim().toLowerCase());
     if (entry.contact_email) emails.add(normalizeEmail(entry.contact_email));
-    if (entry.source_post_url) sourceUrls.add(String(entry.source_post_url).trim());
   }
-  return { domains, names, emails, sourceUrls };
+  return { domains, names, emails };
 }
 
 function dedupeAndExclude(records, ledger, config) {
@@ -208,6 +266,10 @@ function dedupeAndExclude(records, ledger, config) {
     if (name && (seenNames.has(name) || exclusions.names.has(name))) continue;
     if (emails.some((email) => exclusions.emails.has(email) || seenEmails.has(email))) continue;
 
+    const freshness = freshnessStatus(record, config);
+    record.builtwith_last_detected_age_days = freshness.age_days;
+    record.builtwith_freshness_tier = freshness.tier;
+    record.builtwith_freshness_rejection_reason = null;
     record.domain = domain;
     record.preliminary_commercial_score = preliminaryScore(record, config);
     accepted.push(record);
@@ -217,7 +279,10 @@ function dedupeAndExclude(records, ledger, config) {
     for (const email of emails) seenEmails.add(email);
   }
 
+  const tierOrder = { preferred: 0, fallback: 1, unknown: 2 };
   accepted.sort((a, b) => {
+    const tierDifference = (tierOrder[a.builtwith_freshness_tier] ?? 9) - (tierOrder[b.builtwith_freshness_tier] ?? 9);
+    if (tierDifference) return tierDifference;
     const scoreDifference = b.preliminary_commercial_score - a.preliminary_commercial_score;
     if (scoreDifference) return scoreDifference;
     return String(b.last_detected_at ?? '').localeCompare(String(a.last_detected_at ?? ''));
@@ -245,44 +310,98 @@ async function fetchBuiltWithPage({ apiKey, technology, config, offset }) {
   if (config.builtwith.sku_min != null) params.append('SKU', `${config.builtwith.sku_min}|GTE`);
   if (offset) params.set('OFFSET', offset);
 
-  const response = await fetch(`https://api.builtwith.com/lists12/api.json?${params.toString()}`, {
-    headers: { accept: 'application/json' }
+  const endpoint = 'https://api.builtwith.com/lists12/api.json';
+  const fetchedAt = new Date().toISOString();
+  const response = await fetch(`${endpoint}?${params.toString()}`, {
+    headers: {
+      accept: 'application/json',
+      'cache-control': config.builtwith.freshness?.request_cache_control ?? 'no-cache',
+      pragma: config.builtwith.freshness?.request_pragma ?? 'no-cache'
+    }
   });
   if (!response.ok) throw new Error(`BuiltWith request failed for ${technology}: ${response.status} ${response.statusText}`);
-  return response.json();
+
+  const payload = await response.text();
+  let data;
+  try {
+    data = JSON.parse(payload);
+  } catch {
+    throw new Error(`BuiltWith returned invalid JSON for ${technology}.`);
+  }
+
+  const ageHeader = response.headers.get('age');
+  return {
+    data,
+    provenance: {
+      technology,
+      fetched_at: fetchedAt,
+      endpoint,
+      query_since: config.builtwith.since,
+      offset_present: Boolean(offset),
+      response_date: response.headers.get('date'),
+      response_age_seconds: ageHeader != null && Number.isFinite(Number(ageHeader)) ? Number(ageHeader) : null,
+      response_cache_control: response.headers.get('cache-control'),
+      response_etag: response.headers.get('etag'),
+      payload_sha256: sha256(payload),
+      no_cache_requested: true
+    }
+  };
 }
 
 async function discoverFromApi(config) {
   const apiKey = process.env.BUILTWITH_API_KEY;
   if (!apiKey) fail('BUILTWITH_API_KEY is not set. Supply --input=<BuiltWith JSON export> or set the environment variable.');
 
-  const output = [];
+  const records = [];
+  const pages = [];
   for (const technology of config.builtwith.technologies) {
     let offset = null;
     for (let page = 0; page < config.builtwith.max_pages_per_technology; page += 1) {
-      const data = await fetchBuiltWithPage({ apiKey, technology, config, offset });
-      for (const raw of getBuiltWithResults(data)) output.push(normalizeBuiltWithResult(raw, technology, config));
-      const next = getNextOffset(data);
+      const result = await fetchBuiltWithPage({ apiKey, technology, config, offset });
+      pages.push(result.provenance);
+      for (const raw of getBuiltWithResults(result.data)) records.push(normalizeBuiltWithResult(raw, technology, config));
+      const next = getNextOffset(result.data);
       if (!next || next === 'END') break;
       offset = next;
-      if (output.length >= config.campaign.discovery_pool_target * 4) break;
+      if (records.length >= config.campaign.discovery_pool_target * 4) break;
     }
   }
-  return output;
+  return {
+    records,
+    provenance: {
+      type: 'BuiltWith Lists API',
+      api_pages: pages
+    }
+  };
 }
 
 async function discoverFromInput(inputPath, config) {
-  const data = await readJson(path.resolve(inputPath));
+  const absolute = path.resolve(inputPath);
+  const payload = await readFile(absolute, 'utf8');
+  const data = JSON.parse(payload);
+  const fileStat = await stat(absolute);
   const records = [];
   if (Array.isArray(data.sources)) {
     for (const source of data.sources) {
       const technology = source.technology ?? 'BuiltWith export';
       for (const raw of getBuiltWithResults(source.data ?? source)) records.push(normalizeBuiltWithResult(raw, technology, config));
     }
-    return records;
+  } else {
+    const technology = data.technology ?? 'BuiltWith export';
+    for (const raw of getBuiltWithResults(data)) records.push(normalizeBuiltWithResult(raw, technology, config));
   }
-  const technology = data.technology ?? 'BuiltWith export';
-  return getBuiltWithResults(data).map((raw) => normalizeBuiltWithResult(raw, technology, config));
+
+  return {
+    records,
+    provenance: {
+      type: 'BuiltWith export',
+      imported_at: new Date().toISOString(),
+      source_file_name: path.basename(absolute),
+      source_file_modified_at: fileStat.mtime.toISOString(),
+      payload_sha256: sha256(payload),
+      record_level_last_detected_freshness_enforced: true
+    }
+  };
 }
 
 async function ensureCampaign(week, config) {
@@ -307,19 +426,32 @@ const week = mondayIso(args.week);
 const config = await readJson(path.join(cwd, 'outreach', 'config.json'));
 const ledger = await readJson(path.join(cwd, 'public', 'mockups', '_outreach-ledger.json'));
 const campaignDir = await ensureCampaign(week, config);
+const retrievalRunId = randomUUID();
 
-const raw = args.input ? await discoverFromInput(args.input, config) : await discoverFromApi(config);
-const selected = dedupeAndExclude(raw, ledger, config);
+const discovery = args.input ? await discoverFromInput(args.input, config) : await discoverFromApi(config);
+const selected = dedupeAndExclude(discovery.records, ledger, config);
+if (selected.length < config.campaign.qualified_target) {
+  fail(`Only ${selected.length} fresh, commercially filtered, non-duplicate prospects remain. At least ${config.campaign.qualified_target} are required before qualification can begin.`);
+}
+
 const outputFile = path.join(campaignDir, '01-discovered.json');
+const preferredFresh = selected.filter((record) => record.builtwith_freshness_tier === 'preferred').length;
+const fallbackFresh = selected.filter((record) => record.builtwith_freshness_tier === 'fallback').length;
 
 await writeJson(outputFile, {
-  schema_version: 2,
+  schema_version: 3,
   campaign_week: week,
+  retrieval_run_id: retrievalRunId,
   generated_at: new Date().toISOString(),
   source: args.input ? 'BuiltWith export' : 'BuiltWith Lists API',
+  source_provenance: discovery.provenance,
+  freshness_policy: config.builtwith.freshness,
   requested_pool: config.campaign.discovery_pool_target,
   count: selected.length,
+  pool_health: selected.length >= config.campaign.discovery_pool_target ? 'full' : 'usable_but_thin',
+  preferred_fresh_count: preferredFresh,
+  fallback_fresh_count: fallbackFresh,
   prospects: selected
 });
 
-console.log(`Wrote ${selected.length} commercially filtered, non-duplicate prospects to ${path.relative(cwd, outputFile)}`);
+console.log(`Wrote ${selected.length} fresh, commercially filtered, non-duplicate prospects to ${path.relative(cwd, outputFile)}`);
