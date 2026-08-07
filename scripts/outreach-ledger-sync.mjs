@@ -50,42 +50,48 @@ const stage = await readJson(qualifiedFile);
 const ledgerFile = path.join(cwd, 'public', 'mockups', '_outreach-ledger.json');
 const ledger = await readJson(ledgerFile);
 
-const keys = {
-  domains: new Set(),
-  names: new Set(),
-  emails: new Set(),
-  sourcePosts: new Set(),
-  contacts: new Set()
+const indexes = {
+  domains: new Map(),
+  names: new Map(),
+  emails: new Map(),
+  sourcePosts: new Map(),
+  contacts: new Map()
 };
 
+function setIndex(map, key, entry) {
+  if (key && !map.has(key)) map.set(key, entry);
+}
+
 function indexEntry(entry) {
-  if (entry.domain) keys.domains.add(normalizeDomain(entry.domain));
-  if (entry.business_name) keys.names.add(normalize(entry.business_name));
-  if (entry.contact_email) keys.emails.add(normalize(entry.contact_email));
-  if (entry.source_post_url) keys.sourcePosts.add(String(entry.source_post_url).trim());
-  if (entry.owner_or_contact) keys.contacts.add(normalize(entry.owner_or_contact));
+  setIndex(indexes.domains, normalizeDomain(entry.domain), entry);
+  setIndex(indexes.names, normalize(entry.business_name), entry);
+  setIndex(indexes.emails, normalize(entry.contact_email), entry);
+  setIndex(indexes.sourcePosts, String(entry.source_post_url ?? '').trim(), entry);
+  setIndex(indexes.contacts, normalize(entry.owner_or_contact), entry);
 }
 
 for (const entry of ledger.entries ?? []) indexEntry(entry);
 
-function isDuplicate(candidate) {
-  const domain = normalizeDomain(candidate.domain);
-  const name = normalize(candidate.business_name);
-  const email = normalize(candidate.contact_email ?? candidate.recipient_email);
-  const sourcePost = String(candidate.source_post_url ?? '').trim();
-  const contact = normalize(candidate.owner_or_contact ?? candidate.recipient_name);
-  return Boolean(
-    (domain && keys.domains.has(domain)) ||
-    (name && keys.names.has(name)) ||
-    (email && keys.emails.has(email)) ||
-    (sourcePost && keys.sourcePosts.has(sourcePost)) ||
-    (contact && keys.contacts.has(contact))
-  );
+function duplicateMatch(candidate) {
+  const checks = [
+    ['domain', normalizeDomain(candidate.domain), indexes.domains],
+    ['business_name', normalize(candidate.business_name), indexes.names],
+    ['contact_email', normalize(candidate.contact_email ?? candidate.recipient_email), indexes.emails],
+    ['source_post_url', String(candidate.source_post_url ?? '').trim(), indexes.sourcePosts],
+    ['owner_or_contact', normalize(candidate.owner_or_contact ?? candidate.recipient_name), indexes.contacts]
+  ];
+  for (const [field, value, map] of checks) {
+    if (value && map.has(value)) return { field, value, entry: map.get(value) };
+  }
+  return null;
 }
 
-function add(candidate, status) {
-  if (isDuplicate(candidate)) return false;
-  const entry = {
+function isCurrentCampaignEntry(match) {
+  return match?.entry?.campaign_week === week;
+}
+
+function buildEntry(candidate, status) {
+  return {
     business_name: candidate.business_name ?? normalizeDomain(candidate.domain),
     domain: normalizeDomain(candidate.domain) || null,
     owner_or_contact: candidate.owner_or_contact ?? (candidate.recipient_name ? `${candidate.recipient_name}${candidate.recipient_role ? `, ${candidate.recipient_role}` : ''}` : null),
@@ -94,6 +100,7 @@ function add(candidate, status) {
     source_post_url: candidate.source_post_url ?? null,
     source_platform: candidate.source_platform ?? 'BuiltWith-led discovery',
     first_researched_at: candidate.first_researched_at ?? new Date().toISOString().slice(0, 10),
+    campaign_week: week,
     status,
     rejection_reason: status === 'rejected' ? candidate.rejection_reason ?? 'unclassified' : null,
     mockup_slug: candidate.mockup_slug ?? null,
@@ -101,17 +108,39 @@ function add(candidate, status) {
       ? `Qualified for weekly campaign ${week}. Commercial, website, contact and compliance gates passed.`
       : `Evaluated for weekly campaign ${week} and rejected before mock-up production.`)
   };
+}
+
+function addEntry(candidate, status) {
+  const match = duplicateMatch(candidate);
+  if (match) {
+    if (isCurrentCampaignEntry(match)) return { added: false, currentCampaignDuplicate: true, match };
+    return { added: false, currentCampaignDuplicate: false, match };
+  }
+  const entry = buildEntry(candidate, status);
   ledger.entries.push(entry);
   indexEntry(entry);
-  return true;
+  return { added: true, currentCampaignDuplicate: false, match: null };
 }
 
 let qualifiedAdded = 0;
 let rejectedAdded = 0;
-for (const prospect of stage.prospects ?? []) if (add(prospect, 'qualified')) qualifiedAdded += 1;
+
+for (const prospect of stage.prospects ?? []) {
+  const result = addEntry(prospect, 'qualified');
+  if (result.added) {
+    qualifiedAdded += 1;
+    continue;
+  }
+  if (!result.currentCampaignDuplicate) {
+    fail(`${prospect.domain ?? prospect.business_name ?? 'qualified candidate'}: qualified prospect duplicates permanent ledger by ${result.match.field} (${result.match.value}). Replace it before proceeding.`);
+  }
+}
+
 for (const prospect of stage.rejected ?? []) {
   if (!prospect.rejection_reason) fail(`${prospect.domain ?? prospect.business_name ?? 'rejected candidate'}: rejection_reason is required.`);
-  if (add(prospect, 'rejected')) rejectedAdded += 1;
+  const result = addEntry(prospect, 'rejected');
+  if (result.added) rejectedAdded += 1;
+  // A duplicate rejection need not create a second permanent entry because the earlier ledger entry already excludes it.
 }
 
 ledger.updated_at = new Date().toISOString();
