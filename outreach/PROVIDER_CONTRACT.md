@@ -1,6 +1,6 @@
 # Outbound Provider Contract
 
-Serial: WEBLEADS-PROVIDER-20260808-002
+Serial: WEBLEADS-PROVIDER-20260808-003
 
 The research and build workflow is intentionally independent of the final sending platform.
 
@@ -22,6 +22,8 @@ The provider must support:
 - manual sequence pause when a commercial conversation begins
 - idempotent import or send behaviour
 - delivery and reply status export
+- physical postal address/footer delivery
+- a working unsubscribe mechanism
 
 Ordinary email-client scheduled send is not sufficient when it cannot cancel future touches after a reply or other stop event.
 
@@ -84,8 +86,10 @@ Verify all of the following:
 3. A reply is detected and all remaining touches stop.
 4. A bounce is detected and all remaining touches stop.
 5. An opt-out is detected and all remaining touches stop.
-6. The sent message is visible in provider or mailbox history.
-7. Retrying the same message/import does not create a duplicate send.
+6. The required physical postal address/footer appears correctly in the delivered message.
+7. The unsubscribe mechanism appears, works and suppresses remaining touches.
+8. The sent message is visible in provider or mailbox history.
+9. Retrying the same message/import does not create a duplicate send.
 
 The provider-readiness integration test is considered stale after 30 days and must then be repeated.
 
@@ -109,6 +113,7 @@ The preflight refuses production loading unless:
 - the sender identity is complete
 - the provider credential is present in the named environment variable
 - every required provider capability is verified
+- physical-address and unsubscribe delivery behaviour have been verified
 - the recent non-prospect integration test passed
 
 A successful run writes:
@@ -126,6 +131,7 @@ When a provider is selected, add a narrow adapter that:
 3. Uses `message_key` as the idempotency key wherever the provider permits one, and otherwise maintains a local sent-key registry.
 4. Records provider sequence IDs and message IDs.
 5. Reconciles replies, bounces, opt-outs and manual pauses into the provider-independent sequence state.
-6. Exports delivery and reply outcomes for Stage 7 analysis.
+6. Preserves the required physical address/footer and unsubscribe mechanism.
+7. Exports delivery and reply outcomes for Stage 7 analysis.
 
 Do not modify commercial discovery, qualification, research or mock-up logic to suit the sending platform.
