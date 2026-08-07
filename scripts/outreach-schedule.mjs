@@ -32,6 +32,10 @@ async function digest(file) {
   return createHash('sha256').update(content).digest('hex');
 }
 
+function stableId(value) {
+  return createHash('sha256').update(value).digest('hex');
+}
+
 function parseWeek(argv) {
   const raw = argv.find((value) => value.startsWith('--week='))?.slice(7);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(raw ?? '')) fail('Provide --week=YYYY-MM-DD using the Monday campaign start date.');
@@ -178,6 +182,7 @@ if (sequences.length !== config.campaign.qualified_target) fail(`Expected ${conf
 
 const messages = [];
 const dailyInitialCapacity = new Map();
+const messageKeys = new Set();
 
 for (const [index, sequence] of sequences.entries()) {
   if (!validTimeZone(sequence.recipient_timezone)) fail(`${sequence.domain}: invalid or missing IANA recipient_timezone.`);
@@ -189,11 +194,17 @@ for (const [index, sequence] of sequences.entries()) {
   const holidays = Array.isArray(sequence.non_working_dates) ? sequence.non_working_dates : [];
   let localDate = assignInitialDate(week, holidays, dailyInitialCapacity, config.campaign.new_prospects_per_business_day);
   const localTime = localTimeFor(sequence, index, config);
+  const sequenceKey = stableId(`${week}|${String(sequence.recipient_email).trim().toLowerCase()}|${sequence.domain}`);
 
   for (const touch of sequence.touches) {
     if (touch.touch_number > 1) localDate = addRecipientBusinessDays(localDate, config.sequence.business_day_gap, holidays);
+    const messageKey = stableId(`${sequenceKey}|touch:${touch.touch_number}`);
+    if (messageKeys.has(messageKey)) fail(`${sequence.domain}: duplicate message idempotency key generated.`);
+    messageKeys.add(messageKey);
     messages.push({
       campaign_week: week,
+      sequence_key: sequenceKey,
+      message_key: messageKey,
       business_name: sequence.business_name,
       domain: sequence.domain,
       recipient_name: sequence.recipient_name,
@@ -221,15 +232,17 @@ for (const [index, sequence] of sequences.entries()) {
 
 const expectedMessages = config.campaign.qualified_target * config.sequence.touches;
 if (messages.length !== expectedMessages || campaignPreflight.expected_messages !== expectedMessages) fail(`Expected ${expectedMessages} validated messages, found ${messages.length}.`);
+if (messageKeys.size !== expectedMessages) fail(`Expected ${expectedMessages} unique message keys, found ${messageKeys.size}.`);
 
 const manifestFile = path.join(campaignDir, '07-send-manifest.json');
 await writeJson(manifestFile, {
-  schema_version: 5,
+  schema_version: 6,
   campaign_week: week,
   generated_at: new Date().toISOString(),
   provider_status: 'not_loaded',
   sender_mailbox: null,
   reply_aware_provider_required: true,
+  idempotency_keys_verified: true,
   test_mode: testMode,
   production_ready_manifest: !testMode && sourcePreflight.production_source_eligible === true,
   source_preflight_verified: true,
