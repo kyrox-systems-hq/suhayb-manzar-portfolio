@@ -8,7 +8,7 @@ on:
     paths:
       - 'outreach/**'
       - 'scripts/outreach*.mjs'
-      - 'scripts/test-outreach-system.mjs'
+      - 'scripts/test-outreach-system-v2.mjs'
       - 'package.json'
       - '.github/workflows/outreach-system-test.yml'
 
@@ -23,5 +23,5 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Run adversarial outreach tests
-        run: node scripts/test-outreach-system.mjs
+      - name: Run outreach regression suite
+        run: node scripts/test-outreach-system-v2.mjs
