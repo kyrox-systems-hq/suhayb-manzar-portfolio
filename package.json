@@ -4,6 +4,12 @@
   "private": true,
   "description": "Static web-development portfolio for Suhayb Manzar",
   "scripts": {
-    "verify": "node scripts/verify-site.mjs"
+    "verify": "node scripts/verify-site.mjs",
+    "outreach:init": "node scripts/outreach.mjs init",
+    "outreach:discover": "node scripts/outreach.mjs discover",
+    "outreach:status": "node scripts/outreach.mjs status",
+    "outreach:validate": "node scripts/outreach.mjs validate",
+    "outreach:schedule": "node scripts/outreach.mjs schedule",
+    "outreach:ledger-sync": "node scripts/outreach.mjs ledger-sync"
   }
 }
