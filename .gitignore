@@ -4,3 +4,6 @@ node_modules/
 .firebase/
 .DS_Store
 Thumbs.db
+outreach/campaigns/*
+!outreach/campaigns/.gitkeep
+.env
