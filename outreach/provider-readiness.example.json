@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "provider_name": "",
+  "sender_mailbox": "",
+  "sender_display_name": "Suhayb Manzar",
+  "physical_postal_address": "",
+  "unsubscribe_mode": "",
+  "credential_env_var": "",
+  "capabilities": {
+    "per_prospect_custom_content": false,
+    "recipient_timezone_scheduling": false,
+    "same_thread_followups": false,
+    "reply_detection": false,
+    "stop_on_reply": false,
+    "bounce_detection": false,
+    "stop_on_bounce": false,
+    "opt_out_detection": false,
+    "stop_on_opt_out": false,
+    "manual_pause": false,
+    "idempotent_import_or_send": false,
+    "delivery_status_export": false
+  },
+  "integration_test": {
+    "test_recipient": "",
+    "tested_at": null,
+    "initial_send_verified": false,
+    "same_thread_verified": false,
+    "reply_stop_verified": false,
+    "bounce_stop_verified": false,
+    "opt_out_stop_verified": false,
+    "sent_history_verified": false
+  }
+}
