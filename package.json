@@ -9,7 +9,7 @@
     "outreach:discover": "node scripts/outreach-discover.mjs",
     "outreach:live-check": "node scripts/outreach-live-check.mjs",
     "outreach:status": "node scripts/outreach.mjs status",
-    "outreach:validate": "node scripts/outreach-validate.mjs",
+    "outreach:validate": "node scripts/outreach-source-guard.mjs && node scripts/outreach-validate.mjs",
     "outreach:schedule": "node scripts/outreach-schedule.mjs",
     "outreach:ledger-sync": "node scripts/outreach-ledger-sync.mjs",
     "outreach:test": "node scripts/test-outreach-system-v3.mjs"
