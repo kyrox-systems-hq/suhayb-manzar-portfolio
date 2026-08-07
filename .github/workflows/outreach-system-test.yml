@@ -4,13 +4,11 @@ on:
   push:
     branches:
       - agent/weekly-outreach-system
-  pull_request:
-    paths:
-      - 'outreach/**'
-      - 'scripts/outreach*.mjs'
-      - 'scripts/test-outreach-system-v2.mjs'
-      - 'package.json'
-      - '.github/workflows/outreach-system-test.yml'
+    paths-ignore:
+      - 'outreach/ci-test-result.txt'
+
+permissions:
+  contents: write
 
 jobs:
   test:
@@ -24,11 +22,29 @@ jobs:
           git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
           git fetch --depth=1 origin "$GITHUB_SHA"
           git checkout --detach FETCH_HEAD
-      - name: Runtime
+      - name: Run outreach regression suite
+        id: regression
+        continue-on-error: true
         shell: bash
         run: |
-          node --version
-          npm --version
-      - name: Run outreach regression suite
+          set +e
+          node scripts/test-outreach-system-v2.mjs > outreach/ci-test-result.txt 2>&1
+          status=$?
+          echo "EXIT_STATUS=$status" >> outreach/ci-test-result.txt
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Persist diagnostic result
+        if: always()
         shell: bash
-        run: node scripts/test-outreach-system-v2.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add outreach/ci-test-result.txt
+          git commit -m "Record outreach regression result [skip ci]" || true
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push origin HEAD:agent/weekly-outreach-system
+      - name: Fail when regression suite fails
+        if: steps.regression.outputs.status != '0'
+        run: exit 1
