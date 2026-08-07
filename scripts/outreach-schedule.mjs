@@ -122,6 +122,7 @@ async function verifyPreflight(dir) {
   if (preflight.passed !== true) fail('Campaign preflight has not passed.');
 
   const files = {
+    liveChecked: path.join(dir, '01-live-checked.json'),
     qualified: path.join(dir, '02-qualified.json'),
     dossiers: path.join(dir, '03-dossiers.json'),
     mockups: path.join(dir, '04-mockups.json'),
@@ -207,7 +208,7 @@ if (messages.length !== expectedMessages || preflight.expected_messages !== expe
 
 const manifestFile = path.join(campaignDir, '07-send-manifest.json');
 await writeJson(manifestFile, {
-  schema_version: 2,
+  schema_version: 3,
   campaign_week: week,
   generated_at: new Date().toISOString(),
   provider_status: 'not_loaded',
@@ -215,6 +216,7 @@ await writeJson(manifestFile, {
   reply_aware_provider_required: true,
   preflight_verified: true,
   preflight_generated_at: preflight.generated_at,
+  freshness_preflight: preflight.freshness ?? null,
   message_count: messages.length,
   prospects: sequences.length,
   initial_touch_distribution: Object.fromEntries([...dailyInitialCapacity.entries()].sort()),
