@@ -1,6 +1,6 @@
 # Weekly Research-Led Website Outreach System
 
-Serial: WEBLEADS-SYSTEM-20260808-004
+Serial: WEBLEADS-SYSTEM-20260808-005
 
 This directory turns website outreach into a weekly production system for 25 commercially qualified businesses, with five new prospects entering the sequence per recipient working day.
 
@@ -8,120 +8,119 @@ This directory turns website outreach into a weekly production system for 25 com
 
 Start with businesses that can plausibly afford implementation, then find a website problem worth fixing.
 
-Do not start from businesses merely asking strangers for free website feedback.
+The user is not part of the research plumbing. The system must obtain its own prospect data, verify it, build the work and prepare the campaign.
 
-The expensive work begins only after commercial, freshness, contact and compliance gates pass.
+## Production discovery without user handling
 
-## What is deterministic
+BuiltWith Lists API access is optional.
 
-The CLI handles:
+The default no-user route is to research current public BuiltWith website and technology-combination pages directly. Those pages expose useful commercial ranking fields such as estimated sales revenue, technology spend, product count, employee estimate where shown, followers and traffic rank.
 
-- fresh BuiltWith Lists API discovery
-- local revenue, employee, technology-spend, SKU and market filters
-- BuiltWith last-detected freshness checks
-- API response-cache and provenance checks
-- duplicate exclusion against `public/mockups/_outreach-ledger.json`
-- fresh domain liveness and redirect checks
-- campaign handoff validation
-- evidence-grounding checks for email copy
-- SHA-256 protection against changing protected stages after preflight
-- exactly five touches per prospect
-- exactly three recipient business days between touches
-- recipient timezone, holidays and preferred local send times
-- maximum five new prospects per recipient working date
-- stable sequence and message idempotency keys
-- qualified and rejected prospect ledger persistence
-- outbound-provider readiness checks
+The agent gathers multiple current BuiltWith pages itself, writes the private operational source file and runs:
 
-The research agent handles:
+```bash
+npm run outreach:public-builtwith -- --week=2026-08-10 --input=/private/path/current-builtwith-pages.json
+npm run outreach:live-check -- --week=2026-08-10
+```
 
-- commercial cross-checking
-- current desktop and mobile website inspection
-- exact public email verification
-- compliance-basis verification
-- commercial diagnosis
-- sourced evidence-bank creation
-- focused mock-up design and audit
-- live mock-up verification
-- current cold-email theory research
-- writing five grounded, highly personalised touches
+Normal operation must never ask the user to open BuiltWith, download a report, copy rows or paste an export.
 
-## Production freshness rules
-
-A production campaign must begin with a fresh authenticated BuiltWith Lists API pull.
-
-BuiltWith exports remain supported for testing, but they are explicitly marked non-production and cannot generate a production send manifest.
-
-The production discovery path:
-
-1. Requests BuiltWith data with `SINCE=30 Days Ago`.
-2. Requests intermediaries not to serve cached content.
-3. Rejects an API response when a supplied HTTP `Age` header exceeds the configured cache-age limit.
-4. Rejects an API response when a supplied HTTP `Date` header is materially stale.
-5. Records response provenance, timestamps, ETag where available and a SHA-256 of each response payload.
-6. Requires a record-level BuiltWith last-detected timestamp.
-7. Prefers records detected within 14 days.
-8. Rejects records last detected more than 30 days ago.
-9. Rejects materially future-dated BuiltWith timestamps.
-10. Runs a separate fresh HTTP liveness check against every discovered domain and follows redirects.
-11. Treats redirects into excluded businesses or multiple records resolving to the same storefront as duplicates.
-12. Requires the final browser verification and public-email verification to be no older than 24 hours when campaign preflight runs.
-13. Rechecks those ages again before loading the outbound provider.
-
-The BuiltWith pull itself must be no older than 48 hours at production source preflight and provider loading.
-
-BuiltWith revenue, employee and technology-spend values remain estimates and are ranking signals, not verified company financials.
-
-## Weekly cadence
-
-Run the production build over the weekend for the following campaign week.
-
-1. Initialise the campaign.
-2. Pull approximately 40 to 50 fresh commercially credible stores from BuiltWith.
-3. Run live-domain and redirect checks.
-4. Qualify and replace failures until exactly 25 pass.
-5. Persist both qualified and seriously evaluated rejected candidates to the permanent ledger.
-6. Research all 25 and create sourced evidence banks.
-7. Build, audit, deploy and verify 25 focused mock-ups.
-8. Refresh the campaign email standard from current evidence.
-9. Write all five touches for every prospect using evidence IDs only.
-10. Run source, evidence and campaign preflight.
-11. Generate the 125-message send manifest.
-12. Run outbound-provider preflight.
-13. Load the campaign into the verified reply-aware provider.
-14. Send five new prospects per working date.
-15. Stop remaining touches on reply, bounce, opt-out or manual commercial conversation.
-16. Review outcomes before changing the next BuiltWith filters.
-
-## BuiltWith commands
-
-Production:
+When Lists API entitlement is already available, this alternative remains supported:
 
 ```bash
 BUILTWITH_API_KEY=... npm run outreach:discover -- --week=2026-08-10
 npm run outreach:live-check -- --week=2026-08-10
 ```
 
-Test-only import:
+A manually supplied export exists only as a testing route and is not a production dependency.
 
-```bash
-npm run outreach:discover -- --week=2026-08-10 --input=/path/to/builtwith.json
-OUTREACH_TEST_MODE=1 npm run outreach:live-check -- --week=2026-08-10
-```
+## Commercial discovery rules
 
-An imported discovery file cannot become a production-ready send manifest.
+Target:
+
+- US, UK and Canada
+- estimated ecommerce sales around USD 30,000 to USD 300,000 per month
+- estimated technology spend at least USD 100 per month
+- meaningful product catalogue
+- preferably 2 to 50 employees
+- evidence of active commercial technology such as Klaviyo, paid-media tooling, analytics, CRO, review, support or subscription systems
+
+Missing employee count on a public BuiltWith row is allowed at Stage 1 but must be independently resolved before qualification.
+
+BuiltWith financial and employee values are estimates, not verified company results.
+
+## Freshness model
+
+Freshness is layered rather than trusting a single database field.
+
+For the public BuiltWith route:
+
+1. At least four distinct BuiltWith public current-list pages are fetched during the campaign build.
+2. Source-page fetch evidence must be no older than 24 hours.
+3. Exact page provenance is retained for every candidate.
+4. Local commercial and permanent-duplicate filters are applied.
+5. Every selected domain receives a separate no-cache live-domain and redirect check.
+6. Stage 2 performs current desktop/mobile browser inspection.
+7. Stage 2 independently verifies the exact public email and its source.
+8. Browser and contact verification must still be fresh at campaign preflight and provider load.
+
+For the Lists API route, the system additionally records retrieval provenance, response-cache evidence, payload hashes and record-level last-detected timestamps, preferring 14 days or less and rejecting more than 30 days.
+
+No previous campaign discovery file may be reused as a new production run.
+
+## Weekly pipeline
+
+1. Initialise the campaign.
+2. Gather approximately 40 to 50 current commercially credible stores from BuiltWith without user intervention.
+3. Run live-domain and redirect checks.
+4. Qualify and replace failures until exactly 25 pass.
+5. Persist qualified and seriously evaluated rejected candidates to the permanent ledger.
+6. Research all 25 and create sourced evidence banks.
+7. Build, audit, deploy and verify 25 focused mock-ups.
+8. Refresh the campaign cold-email standard from current evidence.
+9. Write five grounded personalised touches per prospect.
+10. Run source, theory, evidence and campaign preflight.
+11. Generate exactly 125 planned messages.
+12. Run outbound-provider preflight.
+13. Load into a verified reply-aware sender.
+14. Send five new prospects per working date.
+15. Stop future touches on reply, bounce, opt-out or manual commercial conversation.
+16. Review actual commercial outcomes before changing the next campaign filters.
+
+## Deterministic safeguards
+
+The CLI enforces:
+
+- permanent duplicate exclusion
+- current source provenance
+- commercial thresholds
+- live-domain/redirect checking
+- exact 25-prospect stage matching
+- fresh site and contact evidence
+- grounded research/mock-up evidence IDs
+- current cold-email theory Review-ID binding
+- final word-count validation
+- generic/repetitive follow-up rejection
+- SHA-256 protection against stage changes after preflight
+- five touches per prospect
+- exactly three recipient business days between touches
+- recipient timezone and known non-working dates
+- maximum five new prospects per working date
+- stable sequence/message idempotency keys
+- provider-independent reply/bounce/opt-out/manual suppression
+- provider capability and integration preflight
 
 ## Campaign files
 
-Each campaign lives under:
+Operational files live under:
 
 ```text
 outreach/campaigns/YYYY-MM-DD/
 ```
 
-The date is the Monday campaign start date.
+They are gitignored because they contain contact information, research dossiers and email copy.
 
-Expected working files:
+Expected files include:
 
 ```text
 campaign.json
@@ -139,13 +138,13 @@ preflight.json
 09-results-review.md
 ```
 
-Operational campaign folders are gitignored because they contain prospect contact details, research dossiers and email copy.
+Public mock-ups and the permanent exclusion ledger remain under `public/mockups/`.
 
 ## Commands
 
 ```bash
 npm run outreach:init -- --week=2026-08-10
-npm run outreach:discover -- --week=2026-08-10
+npm run outreach:public-builtwith -- --week=2026-08-10 --input=/private/path/current-builtwith-pages.json
 npm run outreach:live-check -- --week=2026-08-10
 npm run outreach:status -- --week=2026-08-10
 npm run outreach:ledger-sync -- --week=2026-08-10
@@ -155,88 +154,37 @@ npm run outreach:provider-preflight -- --week=2026-08-10 --config=/secure/path/p
 npm run outreach:test
 ```
 
-The package scripts are the authoritative entrypoints. The generic `scripts/outreach.mjs` intentionally exposes only campaign initialisation and status, so weaker legacy discovery, validation or scheduling routes cannot bypass the hardened gates.
-
-## Evidence-grounded outreach
-
-Stage 3 creates a sourced `evidence_bank` for every prospect.
-
-Stage 4 adds verified `mockup-*` evidence IDs for improvements that are visibly demonstrated in the deployed concept.
-
-Stage 6 may use only those evidence IDs. The preflight rejects:
-
-- unknown evidence IDs
-- unsourced dossier evidence
-- sequences using fewer than four distinct grounded evidence items
-- mismatched final word counts
-- generic low-value follow-up language
-- highly repetitive touches
-- unsupported mock-up claims
-
-The email should feel like one person researched one business and built something specifically for it, not like a mail merge.
-
-## Scheduling and idempotency
-
-A valid campaign produces exactly 25 sequences and 125 messages.
-
-Each message has:
-
-- a stable `sequence_key`
-- a stable `message_key`
-- recipient-local schedule
-- same-thread instruction
-- required stop events
-
-The stable keys allow a provider adapter to prevent duplicate sends if loading or dispatch is retried.
-
-The provider-independent sequence-state module also models suppression after reply, bounce, opt-out or manual conversation.
+The dedicated package scripts are authoritative. The generic `scripts/outreach.mjs` intentionally exposes only initialisation and status.
 
 ## Outbound provider gate
 
-No provider is hard-wired into the research system.
+No real campaign is loaded merely because a manifest exists.
 
-Before loading a real campaign, copy `outreach/provider-readiness.example.json` to a secure operational location and complete it with the selected provider and sender details.
+The provider must prove, using a controlled non-prospect address:
 
-The provider preflight requires:
-
-- authenticated sending credential
-- exact sender mailbox and display name
-- physical postal address
-- unsubscribe method
-- per-prospect custom content
-- recipient-timezone scheduling
+- intended sender mailbox
 - same-thread follow-ups
-- reply detection and stop-on-reply
+- reply detection and stop
 - bounce detection and stop
 - opt-out detection and stop
 - manual pause
-- idempotent import or send behaviour
-- delivery-status export
-- a recent non-prospect integration test proving initial send, threading, reply stop, bounce stop, opt-out stop and sent-history visibility
+- required physical-address/footer delivery
+- working unsubscribe behaviour
+- sent-history visibility
+- idempotent retry behaviour
 
 See `outreach/PROVIDER_CONTRACT.md`.
 
 ## Testing
 
-`npm run outreach:test` runs three independent regression suites:
+`npm run outreach:test` exercises the current no-user BuiltWith route as well as the API/import core, source freshness, liveness, qualification, theory freshness, evidence grounding, permanent duplicates, two-week batching, scheduling, provider lifecycle, provider timing, provider preflight and reply planning.
 
-1. Campaign discovery, source freshness, liveness, qualification, evidence grounding, scheduling and ledger persistence.
-2. Provider-independent lifecycle suppression and idempotency.
-3. Outbound provider-preflight validation.
+`outreach/TEST_REPORT.md` records the failure-oriented hardening history.
 
-`outreach/TEST_REPORT.md` records the failure-oriented test history and the defects found during hardening.
-
-Synthetic tests do not substitute for the two final activation tests:
-
-- authenticated live BuiltWith Lists API retrieval
-- an authenticated non-prospect outbound-provider integration test
+The remaining activation work is external behaviour, not user data collection: live current public BuiltWith discovery is performed by the agent, and the eventual authenticated sender must pass its controlled integration test before any prospect is contacted.
 
 ## Stage prompts
 
-Start with:
+Start with `outreach/prompts/00-weekly-orchestrator.md`, then run Stages 1 to 6 in order. Stage 7 is the results-learning loop.
 
-`outreach/prompts/00-weekly-orchestrator.md`
-
-Then run Stages 1 to 6 in order. Stage 7 is the post-campaign learning loop.
-
-Never combine stages simply to save time.
+Never combine stages merely to save time.
