@@ -12,6 +12,7 @@
     "outreach:validate": "node scripts/outreach-preflight.mjs",
     "outreach:schedule": "node scripts/outreach-schedule.mjs",
     "outreach:ledger-sync": "node scripts/outreach-ledger-sync.mjs",
-    "outreach:test": "node scripts/test-outreach-system-v4.mjs"
+    "outreach:provider-preflight": "node scripts/outreach-provider-preflight.mjs",
+    "outreach:test": "node scripts/test-outreach-system-v5.mjs"
   }
 }
