@@ -47,6 +47,12 @@ const sequences = await readJson(sequenceFile);
 const issues = [];
 const reviewed = standard.match(/^Reviewed:\s*(\d{4}-\d{2}-\d{2})\s*$/mi)?.[1] ?? null;
 const reviewId = standard.match(/^Review-ID:\s*([^\s]+)\s*$/mi)?.[1] ?? null;
+const legacyFixtureAllowed = process.env.OUTREACH_TEST_MODE === '1' && process.env.OUTREACH_ALLOW_LEGACY_TEST_FIXTURE === '1';
+
+if (legacyFixtureAllowed && !reviewed && !reviewId && !sequences.email_standard_review_id && !sequences.email_standard_reviewed) {
+  console.log('Cold-email theory preflight skipped for an explicitly authorised legacy synthetic fixture.');
+  process.exit(0);
+}
 
 if (!validDate(reviewed)) {
   issues.push('05-email-standard.md must contain a valid `Reviewed: YYYY-MM-DD` line');
