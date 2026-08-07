@@ -1,6 +1,6 @@
 # Stage 6: Personalised Sequences and Scheduling
 
-Serial: WEBLEADS-STAGE6-20260807-001
+Serial: WEBLEADS-STAGE6-20260807-002
 
 ## Objective
 
@@ -75,6 +75,18 @@ Reject generic lines such as:
 
 Do not invent urgency, results or financial impact.
 
+## Recipient timing research
+
+For each prospect:
+
+- confirm the correct IANA timezone from the verified business location
+- choose the preferred local send time using the campaign email standard and what is known about the recipient's role
+- record it as `preferred_local_send_time` in 24-hour `HH:MM` format
+- identify relevant public holidays or other known non-working dates that intersect the sequence and record them as ISO dates in `non_working_dates`
+- if there is no evidence for a more precise time, omit `preferred_local_send_time` and let the scheduler use the configured local business-hours window
+
+The scheduler treats each follow-up as three **recipient business days** after the previous touch. It skips Saturdays, Sundays and the supplied `non_working_dates`.
+
 ## Required JSON structure
 
 Each sequence record must contain:
@@ -85,6 +97,8 @@ Each sequence record must contain:
 - recipient_role
 - recipient_email
 - recipient_timezone
+- preferred_local_send_time, optional
+- non_working_dates, array
 - country
 - live_mockup_url
 - compliance_status
