@@ -75,6 +75,7 @@ async function status(week) {
     'campaign.json',
     '01-discovered.json',
     '01-live-checked.json',
+    'source-preflight.json',
     '02-qualified.json',
     '03-dossiers.json',
     '04-mockups.json',
@@ -82,7 +83,8 @@ async function status(week) {
     '06-sequences.json',
     'preflight.json',
     '07-send-manifest.json',
-    '08-results-review.md'
+    '08-provider-preflight.json',
+    '09-results-review.md'
   ];
 
   for (const file of files) {
@@ -122,5 +124,5 @@ switch (command) {
     await status(week);
     break;
   default:
-    fail(`Unknown command: ${command}. Use the dedicated npm scripts for discovery, live checking, validation, scheduling and ledger sync.`);
+    fail(`Unknown command: ${command}. Use the dedicated npm scripts for discovery, live checking, validation, scheduling, provider preflight and ledger sync.`);
 }
