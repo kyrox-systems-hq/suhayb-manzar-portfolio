@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "campaign": {
     "qualified_target": 25,
     "discovery_pool_target": 50,
@@ -33,6 +33,15 @@
       "request_cache_control": "no-cache, no-store",
       "request_pragma": "no-cache"
     }
+  },
+  "liveness": {
+    "timeout_ms": 12000,
+    "min_viable_for_qualification": 25,
+    "accepted_status_min": 200,
+    "accepted_status_max": 399,
+    "manual_recheck_statuses": [401, 403, 429],
+    "request_cache_control": "no-cache, no-store",
+    "request_pragma": "no-cache"
   },
   "qualification": {
     "weights": {
