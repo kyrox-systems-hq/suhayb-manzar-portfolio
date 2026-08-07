@@ -6,10 +6,11 @@
   "scripts": {
     "verify": "node scripts/verify-site.mjs",
     "outreach:init": "node scripts/outreach.mjs init",
-    "outreach:discover": "node scripts/outreach.mjs discover",
+    "outreach:discover": "node scripts/outreach-discover.mjs",
     "outreach:status": "node scripts/outreach.mjs status",
-    "outreach:validate": "node scripts/outreach.mjs validate",
+    "outreach:validate": "node scripts/outreach-validate.mjs",
     "outreach:schedule": "node scripts/outreach-schedule.mjs",
-    "outreach:ledger-sync": "node scripts/outreach.mjs ledger-sync"
+    "outreach:ledger-sync": "node scripts/outreach-ledger-sync.mjs",
+    "outreach:test": "node scripts/test-outreach-system.mjs"
   }
 }
