@@ -55,7 +55,8 @@
     "website_problem_required": true,
     "commercial_credibility_required": true,
     "fresh_live_site_check_required": true,
-    "live_site_check_max_age_hours": 24
+    "live_site_check_max_age_hours": 24,
+    "contact_email_check_max_age_hours": 24
   },
   "sequence": {
     "touches": 5,
