@@ -7,6 +7,7 @@
     "verify": "node scripts/verify-site.mjs",
     "outreach:init": "node scripts/outreach.mjs init",
     "outreach:discover": "node scripts/outreach-discover.mjs",
+    "outreach:public-builtwith": "node scripts/outreach-public-builtwith.mjs",
     "outreach:live-check": "node scripts/outreach-live-check.mjs",
     "outreach:status": "node scripts/outreach.mjs status",
     "outreach:ledger-sync": "node scripts/outreach-ledger-sync.mjs",
@@ -14,6 +15,6 @@
     "outreach:schedule": "node scripts/outreach-schedule.mjs",
     "outreach:provider-preflight": "node scripts/outreach-provider-full-preflight.mjs",
     "outreach:reply-plan": "node scripts/outreach-reply-plan.mjs",
-    "outreach:test": "node scripts/test-outreach-system-current.mjs && node scripts/test-outreach-theory-timing.mjs && node scripts/test-outreach-ledger-duplicate.mjs && node scripts/test-outreach-two-week-batch.mjs && node scripts/test-outreach-provider-lifecycle.mjs && node scripts/test-outreach-provider-time.mjs && node scripts/test-outreach-provider-preflight-current.mjs && node scripts/test-outreach-reply-plan.mjs"
+    "outreach:test": "node scripts/test-outreach-system-current.mjs && node scripts/test-outreach-public-builtwith.mjs && node scripts/test-outreach-theory-timing.mjs && node scripts/test-outreach-ledger-duplicate.mjs && node scripts/test-outreach-two-week-batch.mjs && node scripts/test-outreach-provider-lifecycle.mjs && node scripts/test-outreach-provider-time.mjs && node scripts/test-outreach-provider-preflight-current.mjs && node scripts/test-outreach-reply-plan.mjs"
   }
 }
