@@ -63,6 +63,20 @@ function validTimeZone(value) {
   }
 }
 
+function validIsoTimestamp(value) {
+  if (typeof value !== 'string' || !value.trim()) return false;
+  return Number.isFinite(new Date(value).valueOf());
+}
+
+function ageHours(value, nowMs = Date.now()) {
+  if (!validIsoTimestamp(value)) return Infinity;
+  return Math.max(0, (nowMs - new Date(value).valueOf()) / 3600000);
+}
+
+function ageDays(value, nowMs = Date.now()) {
+  return ageHours(value, nowMs) / 24;
+}
+
 function wordCount(text) {
   return String(text ?? '').trim().split(/\s+/).filter(Boolean).length;
 }
@@ -92,6 +106,17 @@ function sameSet(a, b) {
   return true;
 }
 
+function liveCandidateMap(items) {
+  const map = new Map();
+  for (const item of items) {
+    const original = normalizeDomain(item.domain);
+    const finalDomain = normalizeDomain(item.live_check?.final_domain);
+    if (original) map.set(original, item);
+    if (finalDomain) map.set(finalDomain, item);
+  }
+  return map;
+}
+
 const week = parseWeek(process.argv.slice(2));
 const config = await readJson(path.join(cwd, 'outreach', 'config.json'));
 const dir = path.join(cwd, 'outreach', 'campaigns', week);
@@ -99,6 +124,7 @@ const preflightFile = path.join(dir, 'preflight.json');
 await rm(preflightFile, { force: true });
 
 const requiredFiles = {
+  liveChecked: path.join(dir, '01-live-checked.json'),
   qualified: path.join(dir, '02-qualified.json'),
   dossiers: path.join(dir, '03-dossiers.json'),
   mockups: path.join(dir, '04-mockups.json'),
@@ -117,42 +143,77 @@ if (issues.length) {
   process.exit(1);
 }
 
+const liveCheckedData = await readJson(requiredFiles.liveChecked);
 const qualifiedData = await readJson(requiredFiles.qualified);
 const dossierData = await readJson(requiredFiles.dossiers);
 const mockupData = await readJson(requiredFiles.mockups);
 const sequenceData = await readJson(requiredFiles.sequences);
 const emailStandard = await readFile(requiredFiles.emailStandard, 'utf8');
 
+const liveCandidates = liveCheckedData.qualification_candidates ?? [];
 const qualified = qualifiedData.prospects ?? [];
 const dossiers = dossierData.dossiers ?? [];
 const mockups = mockupData.mockups ?? [];
 const sequences = sequenceData.sequences ?? [];
 const target = config.campaign.qualified_target;
 
+if (liveCandidates.length < target) issues.push(`01-live-checked.json has only ${liveCandidates.length} qualification candidates, expected at least ${target}`);
 if (qualified.length !== target) issues.push(`02-qualified.json has ${qualified.length} prospects, expected ${target}`);
 if (dossiers.length !== target) issues.push(`03-dossiers.json has ${dossiers.length} dossiers, expected ${target}`);
 if (mockups.length !== target) issues.push(`04-mockups.json has ${mockups.length} mock-ups, expected ${target}`);
 if (sequences.length !== target) issues.push(`06-sequences.json has ${sequences.length} sequences, expected ${target}`);
 
+const liveMap = liveCandidateMap(liveCandidates);
 const qualifiedDomains = new Set();
 const qualifiedEmails = new Set();
 const allowedCountries = new Set(config.campaign.markets);
 const scoreFields = ['ability_to_pay', 'website_opportunity', 'commercial_urgency', 'marketing_spend_evidence', 'decision_maker_accessibility', 'weighted_score'];
+const liveMaxAgeHours = Number(config.qualification.live_site_check_max_age_hours ?? 24);
+const builtWithMaxAgeDays = Number(config.builtwith.freshness?.max_last_detected_age_days ?? 30);
+const contactMaxAgeHours = Number(config.qualification.contact_email_check_max_age_hours ?? liveMaxAgeHours);
 
 for (const [index, prospect] of qualified.entries()) {
   const domain = normalizeDomain(prospect.domain);
   const email = normalizeEmail(prospect.contact_email ?? prospect.recipient_email);
   const label = domain || prospect.business_name || `prospect ${index + 1}`;
+  const liveCandidate = liveMap.get(domain);
 
   if (!isNonEmpty(prospect.business_name)) issues.push(`${label}: business_name missing`);
   if (!domain) issues.push(`${label}: domain missing`);
   if (domain && qualifiedDomains.has(domain)) issues.push(`${label}: duplicate domain inside qualified set`);
   if (domain) qualifiedDomains.add(domain);
+  if (!liveCandidate) issues.push(`${label}: prospect did not come from the current live-checked discovery pool`);
   if (!allowedCountries.has(prospect.country)) issues.push(`${label}: country ${prospect.country ?? '(missing)'} is not in the configured campaign markets`);
   if (!isNonEmpty(prospect.location)) issues.push(`${label}: business location missing`);
   if (!validTimeZone(prospect.timezone)) issues.push(`${label}: valid IANA timezone missing`);
+
+  if (!validIsoTimestamp(prospect.builtwith_last_detected_at)) {
+    issues.push(`${label}: builtwith_last_detected_at missing or invalid`);
+  } else if (ageDays(prospect.builtwith_last_detected_at) > builtWithMaxAgeDays) {
+    issues.push(`${label}: BuiltWith last-detected evidence is older than ${builtWithMaxAgeDays} days at preflight`);
+  }
+  if (!Number.isFinite(Number(prospect.builtwith_last_detected_age_days_at_discovery))) issues.push(`${label}: BuiltWith discovery-age record missing`);
+  if (!['preferred', 'fallback'].includes(prospect.builtwith_freshness_tier)) issues.push(`${label}: BuiltWith freshness tier missing or invalid`);
+  if (liveCandidate) {
+    if (prospect.builtwith_last_detected_at !== liveCandidate.last_detected_at) issues.push(`${label}: BuiltWith last-detected timestamp does not match current discovery record`);
+    if (prospect.builtwith_freshness_tier !== liveCandidate.builtwith_freshness_tier) issues.push(`${label}: BuiltWith freshness tier does not match current discovery record`);
+  }
+
+  if (!validIsoTimestamp(prospect.live_site_checked_at)) {
+    issues.push(`${label}: live_site_checked_at missing or invalid`);
+  } else if (ageHours(prospect.live_site_checked_at) > liveMaxAgeHours) {
+    issues.push(`${label}: browser live-site verification is older than ${liveMaxAgeHours} hours`);
+  }
+  if (prospect.live_site_status !== 'active') issues.push(`${label}: live_site_status must be active`);
+  if (!validHttpUrl(prospect.live_site_final_url)) issues.push(`${label}: live_site_final_url missing or invalid`);
+  if (!domain || normalizeDomain(prospect.live_site_final_domain) !== domain) issues.push(`${label}: qualified domain must match the browser-verified final domain`);
+  if (!Array.isArray(prospect.live_site_evidence_urls) || prospect.live_site_evidence_urls.length === 0 || prospect.live_site_evidence_urls.some((url) => !validHttpUrl(url))) {
+    issues.push(`${label}: live-site evidence URLs missing or invalid`);
+  }
+
   if (!isNonEmpty(prospect.commercial_verification_notes)) issues.push(`${label}: commercial verification notes missing`);
   if (!isNonEmpty(prospect.primary_website_problem)) issues.push(`${label}: primary website problem missing`);
+  if (!Array.isArray(prospect.problem_evidence) || prospect.problem_evidence.length === 0) issues.push(`${label}: website problem evidence missing`);
   if (!isNonEmpty(prospect.best_conversion_surface)) issues.push(`${label}: best conversion surface missing`);
   if (!isNonEmpty(prospect.recipient_name)) issues.push(`${label}: recipient name missing`);
   if (!isNonEmpty(prospect.recipient_role)) issues.push(`${label}: recipient role missing`);
@@ -160,6 +221,12 @@ for (const [index, prospect] of qualified.entries()) {
   if (email && qualifiedEmails.has(email)) issues.push(`${label}: duplicate contact email inside qualified set`);
   if (email) qualifiedEmails.add(email);
   if (!validHttpUrl(prospect.email_source_url)) issues.push(`${label}: email_source_url missing or invalid`);
+  if (!validIsoTimestamp(prospect.contact_email_verified_at)) {
+    issues.push(`${label}: contact_email_verified_at missing or invalid`);
+  } else if (ageHours(prospect.contact_email_verified_at) > contactMaxAgeHours) {
+    issues.push(`${label}: public email verification is older than ${contactMaxAgeHours} hours`);
+  }
+
   if (prospect.compliance_status !== 'eligible') issues.push(`${label}: compliance_status must be eligible`);
   if (!isNonEmpty(prospect.compliance_basis)) issues.push(`${label}: compliance basis missing`);
   if (!Array.isArray(prospect.compliance_evidence_urls) || prospect.compliance_evidence_urls.length === 0 || prospect.compliance_evidence_urls.some((url) => !validHttpUrl(url))) {
@@ -283,13 +350,18 @@ if (issues.length) {
 const hashes = {};
 for (const [label, file] of Object.entries(requiredFiles)) hashes[label] = await digest(file);
 const report = {
-  schema_version: 1,
+  schema_version: 2,
   campaign_week: week,
   generated_at: new Date().toISOString(),
   passed: true,
   qualified_prospects: qualified.length,
   sequences: sequences.length,
   expected_messages: sequences.length * config.sequence.touches,
+  freshness: {
+    builtwith_max_age_days: builtWithMaxAgeDays,
+    live_site_max_age_hours: liveMaxAgeHours,
+    contact_email_max_age_hours: contactMaxAgeHours
+  },
   source_hashes: hashes
 };
 await writeFile(preflightFile, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
