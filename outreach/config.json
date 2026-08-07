@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "campaign": {
+    "qualified_target": 25,
+    "discovery_pool_target": 50,
+    "new_prospects_per_business_day": 5,
+    "primary_business_type": "ecommerce",
+    "markets": ["US", "UK", "CA"],
+    "australia_default": "exclude_unless_consent_basis_verified"
+  },
+  "builtwith": {
+    "technologies": ["Shopify", "WooCommerce", "BigCommerce"],
+    "since": "30 Days Ago",
+    "revenue_usd_monthly": {
+      "min": 30000,
+      "max": 300000
+    },
+    "employees": {
+      "min": 2,
+      "max": 50
+    },
+    "technology_spend_usd_monthly": {
+      "min": 100
+    },
+    "sku_min": 10,
+    "include_meta": true,
+    "max_pages_per_technology": 8
+  },
+  "qualification": {
+    "weights": {
+      "ability_to_pay": 0.25,
+      "website_opportunity": 0.25,
+      "commercial_urgency": 0.20,
+      "marketing_spend_evidence": 0.15,
+      "decision_maker_accessibility": 0.15
+    },
+    "verified_email_required": true,
+    "website_problem_required": true,
+    "commercial_credibility_required": true
+  },
+  "sequence": {
+    "touches": 5,
+    "business_day_gap": 3,
+    "initial_send_window_local": {
+      "start": "09:10",
+      "end": "10:40"
+    },
+    "thread_mode": "same_thread",
+    "stop_on": ["reply", "bounce", "opt_out", "manual_conversation"],
+    "initial_max_words": 110,
+    "followup_max_words": 90
+  },
+  "compliance": {
+    "US": "can_spam_required",
+    "UK": "corporate_subscriber_or_other_verified_basis_required",
+    "CA": "casl_verified_consent_basis_required",
+    "AU": "verified_consent_required_exclude_by_default"
+  }
+}
