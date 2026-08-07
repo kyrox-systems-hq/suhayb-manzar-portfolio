@@ -1,10 +1,10 @@
 # Stage 6: Personalised Sequences and Scheduling
 
-Serial: WEBLEADS-STAGE6-20260807-002
+Serial: WEBLEADS-STAGE6-20260808-003
 
 ## Objective
 
-Write the complete five-touch sequence for all 25 prospects, then generate the reply-aware send manifest.
+Write the complete five-touch sequence for all 25 prospects, ground every material claim in the research/mock-up evidence bank, then generate the reply-aware send manifest.
 
 Read:
 
@@ -25,9 +25,7 @@ npm run outreach:validate -- --week=<week>
 npm run outreach:schedule -- --week=<week>
 ```
 
-This creates:
-
-- `outreach/campaigns/<week>/07-send-manifest.json`
+This creates `outreach/campaigns/<week>/07-send-manifest.json` only after source, evidence and campaign preflights pass.
 
 ## Sequence logic
 
@@ -56,7 +54,22 @@ Touch 5, three recipient business days later:
 - final short close
 - no guilt
 - no passive aggression
-- easy yes/no or implementation response
+- easy implementation response
+
+## Evidence-grounding gate
+
+Every `evidence_used` value must be an **evidence ID**, not free-form prose.
+
+Valid IDs come only from:
+
+- `03-dossiers.json > evidence_bank[].id`
+- `04-mockups.json > demonstrated_improvements[].id`
+
+Do not introduce a fact, commercial signal or demonstrated improvement into the sequence unless it exists in one of those evidence records.
+
+Across all five touches, use at least four distinct grounded evidence IDs. Do not simply relabel the same observation five times.
+
+The preflight rejects unknown evidence IDs and follow-ups that are textually too similar to one another.
 
 ## Personalisation gate
 
@@ -85,7 +98,7 @@ For each prospect:
 - identify relevant public holidays or other known non-working dates that intersect the sequence and record them as ISO dates in `non_working_dates`
 - if there is no evidence for a more precise time, omit `preferred_local_send_time` and let the scheduler use the configured local business-hours window
 
-The scheduler treats each follow-up as three **recipient business days** after the previous touch. It skips Saturdays, Sundays and the supplied `non_working_dates`.
+The scheduler treats each follow-up as three recipient business days after the previous touch. It skips Saturdays, Sundays and the supplied `non_working_dates`.
 
 ## Required JSON structure
 
@@ -103,39 +116,31 @@ Each sequence record must contain:
 - live_mockup_url
 - compliance_status
 - compliance_basis
-- touches: array of exactly five objects
+- touches, array of exactly five objects
 
 Each touch must contain:
 
-- touch_number
-- subject for Touch 1, null for threaded follow-ups unless the provider requires otherwise
-- body_text
-- purpose
-- evidence_used
-- word_count
+```json
+{
+  "touch_number": 1,
+  "subject": "Touch 1 subject, null for threaded follow-ups",
+  "body_text": "",
+  "purpose": "",
+  "evidence_used": ["site-1", "mockup-hierarchy"],
+  "word_count": 0
+}
+```
 
-## Provider scheduling gate
+The recorded `word_count` must match the final body after editing.
+
+## Production scheduling gate
+
+A production manifest cannot be generated from a BuiltWith export or test-mode source preflight. Production scheduling requires the fresh authenticated BuiltWith Lists API path.
 
 Do not send automatically.
 
-Before loading `07-send-manifest.json` into an outbound provider, confirm:
+Before loading `07-send-manifest.json` into an outbound provider, confirm the exact sender mailbox, authenticated sending capability, reply detection, bounce detection, opt-out handling, same-thread behaviour, recipient timezone, stop-on-reply functionality and compliance status.
 
-- exact sender mailbox
-- authenticated sending capability
-- correct recipient
-- reply detection
-- bounce detection
-- opt-out handling
-- same-thread follow-up behaviour
-- recipient timezone
-- stop-on-reply functionality
-- compliance status
-
-The provider must stop remaining touches after:
-
-- reply
-- bounce
-- opt-out
-- manual commercial conversation
+The provider must stop remaining touches after reply, bounce, opt-out or manual commercial conversation.
 
 Ordinary scheduled-send functionality that cannot stop on reply is not sufficient.
