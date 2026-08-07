@@ -1,25 +1,28 @@
 # Weekly Research-Led Website Outreach System
 
-Serial: WEBLEADS-SYSTEM-20260807-002
+Serial: WEBLEADS-SYSTEM-20260807-003
 
 This directory turns the portfolio outreach process into a weekly production system for 25 qualified businesses.
 
 ## Operating model
 
-The system deliberately separates deterministic operations from judgement-heavy work.
+The system separates deterministic operations from judgement-heavy work.
 
 The CLI handles:
 
 - BuiltWith list ingestion and API discovery
+- local commercial filtering of API results and imports
 - duplicate exclusion against `public/mockups/_outreach-ledger.json`
 - campaign folders and stage files
 - preliminary commercial scoring
-- stage validation
+- strict full-campaign preflight
+- SHA-256 protection against changing campaign stages after preflight
 - five-touch sequence timing
 - three-recipient-business-day follow-up spacing
 - recipient timezone and known non-working dates
+- maximum five new prospects per recipient working date
 - sequence QA rules
-- ledger synchronisation after qualification
+- qualified and rejected prospect ledger synchronisation
 
 The research agent handles:
 
@@ -36,24 +39,24 @@ The research agent handles:
 
 Run the campaign at the weekend for the following Monday.
 
-1. Discover 40 to 50 commercially credible stores.
+1. Discover approximately 40 to 50 commercially credible stores.
 2. Qualify and replace failures until exactly 25 pass.
-3. Research all 25 and define one intervention each.
-4. Build, audit and deploy 25 focused mock-ups.
-5. Refresh the campaign email standard from current evidence.
-6. Write all five touches for all 25 prospects.
-7. Generate the send manifest.
-8. Load the manifest into a reply-aware outbound sequencer.
-9. Send five new prospects per working day.
-10. Review replies and commercial outcomes before changing the next campaign filters.
+3. Persist both qualified and seriously evaluated rejected candidates to the permanent ledger.
+4. Research all 25 and define one intervention each.
+5. Build, audit and deploy 25 focused mock-ups.
+6. Refresh the campaign email standard from current evidence.
+7. Write all five touches for all 25 prospects.
+8. Run strict campaign preflight.
+9. Generate the 125-message send manifest.
+10. Load the manifest into a reply-aware outbound sequencer.
+11. Send five new prospects per working date.
+12. Review replies and commercial outcomes before changing the next campaign filters.
 
-The system does **not** automatically send emails. Sending is intentionally separated because the outbound provider must be authenticated, capable of stopping on reply, and configured with the correct mailbox, unsubscribe handling and jurisdictional requirements.
+The system does **not** automatically send emails. Sending remains separate because the provider must be authenticated, capable of stopping on reply, and configured with the correct mailbox, unsubscribe handling and jurisdictional requirements.
 
 ## BuiltWith
 
 The discovery script supports the BuiltWith Lists API when `BUILTWITH_API_KEY` is present.
-
-Example:
 
 ```bash
 BUILTWITH_API_KEY=... npm run outreach:discover -- --week=2026-08-10
@@ -65,7 +68,7 @@ It can also ingest a BuiltWith JSON export:
 npm run outreach:discover -- --week=2026-08-10 --input=/path/to/builtwith.json
 ```
 
-BuiltWith revenue is treated as an estimate and ranking signal, never as verified turnover.
+Both paths receive the configured local commercial filters and permanent duplicate exclusions. BuiltWith revenue is treated as an estimate and ranking signal, never as verified turnover.
 
 ## Campaign folders
 
@@ -87,9 +90,12 @@ campaign.json
 04-mockups.json
 05-email-standard.md
 06-sequences.json
+preflight.json
 07-send-manifest.json
 08-results-review.md
 ```
+
+`preflight.json` is generated only when the full campaign passes validation. It stores hashes of the protected campaign stages. Scheduling refuses to run if any protected file changes afterwards.
 
 Operational campaign files should not be placed under `public/` and are gitignored because they contain prospect contact details, research dossiers and email copy.
 
@@ -99,10 +105,13 @@ Operational campaign files should not be placed under `public/` and are gitignor
 npm run outreach:init -- --week=2026-08-10
 npm run outreach:discover -- --week=2026-08-10
 npm run outreach:status -- --week=2026-08-10
+npm run outreach:ledger-sync -- --week=2026-08-10
 npm run outreach:validate -- --week=2026-08-10
 npm run outreach:schedule -- --week=2026-08-10
-npm run outreach:ledger-sync -- --week=2026-08-10
+npm run outreach:test
 ```
+
+The package scripts are the authoritative entrypoints. The generic `scripts/outreach.mjs` intentionally exposes only campaign initialisation and status, so weaker legacy discovery, validation or scheduling paths cannot bypass the hardened gates.
 
 ## Stage prompts
 
@@ -131,9 +140,15 @@ Do not use ordinary scheduled-send functionality if it cannot reliably enforce t
 
 See `outreach/PROVIDER_CONTRACT.md` before connecting a sender.
 
+## Testing
+
+`outreach/TEST_REPORT.md` records the failure-oriented synthetic campaign test performed on 7 August 2026. It deliberately exercised duplicates, commercial-filter failures, incomplete stages, bad follow-ups, stale preflight data, holidays, local send times, three-business-day spacing and ledger persistence.
+
+That synthetic test does not substitute for live activation tests using an authenticated BuiltWith key and the selected reply-aware outbound provider.
+
 ## Cold-email baseline
 
-The campaign-level theory review should be refreshed before the emails are written. The starting evidence base is:
+The campaign-level theory review must be refreshed before the emails are written. The starting evidence base is:
 
 - concise, highly relevant initial emails
 - current account research in the opening
