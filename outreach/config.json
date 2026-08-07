@@ -26,6 +26,7 @@
     "include_meta": true,
     "max_pages_per_technology": 8,
     "require_live_api_for_production": true,
+    "source_pull_max_age_hours_for_qualification": 48,
     "freshness": {
       "preferred_last_detected_age_days": 14,
       "max_last_detected_age_days": 30,
