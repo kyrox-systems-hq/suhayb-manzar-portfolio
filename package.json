@@ -9,7 +9,7 @@
     "outreach:discover": "node scripts/outreach.mjs discover",
     "outreach:status": "node scripts/outreach.mjs status",
     "outreach:validate": "node scripts/outreach.mjs validate",
-    "outreach:schedule": "node scripts/outreach.mjs schedule",
+    "outreach:schedule": "node scripts/outreach-schedule.mjs",
     "outreach:ledger-sync": "node scripts/outreach.mjs ledger-sync"
   }
 }
