@@ -74,6 +74,7 @@ async function status(week) {
   const files = [
     'campaign.json',
     '01-discovered.json',
+    '01-live-checked.json',
     '02-qualified.json',
     '03-dossiers.json',
     '04-mockups.json',
@@ -93,6 +94,7 @@ async function status(week) {
     if (file.endsWith('.json')) {
       const data = await readJson(full);
       const count = data.count
+        ?? data.qualification_candidate_count
         ?? data.prospects?.length
         ?? data.dossiers?.length
         ?? data.mockups?.length
@@ -120,5 +122,5 @@ switch (command) {
     await status(week);
     break;
   default:
-    fail(`Unknown command: ${command}. Use the dedicated npm scripts for discovery, validation, scheduling and ledger sync.`);
+    fail(`Unknown command: ${command}. Use the dedicated npm scripts for discovery, live checking, validation, scheduling and ledger sync.`);
 }
