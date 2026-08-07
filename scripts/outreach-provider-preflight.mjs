@@ -48,9 +48,13 @@ function validIso(value) {
   return typeof value === 'string' && Number.isFinite(new Date(value).valueOf());
 }
 
-function ageDays(value) {
+function ageHours(value) {
   if (!validIso(value)) return Infinity;
-  return Math.max(0, (Date.now() - new Date(value).valueOf()) / 86400000);
+  return Math.max(0, (Date.now() - new Date(value).valueOf()) / 3600000);
+}
+
+function ageDays(value) {
+  return ageHours(value) / 24;
 }
 
 function sha256(value) {
@@ -65,19 +69,48 @@ const providerFile = path.resolve(args.config);
 if (!(await exists(providerFile))) fail(`Provider config not found: ${providerFile}`);
 const providerText = await readFile(providerFile, 'utf8');
 const provider = JSON.parse(providerText);
-const manifestFile = path.join(cwd, 'outreach', 'campaigns', week, '07-send-manifest.json');
-if (!(await exists(manifestFile))) fail('07-send-manifest.json is missing. Run outreach:schedule first.');
+const campaignDir = path.join(cwd, 'outreach', 'campaigns', week);
+const manifestFile = path.join(campaignDir, '07-send-manifest.json');
+const discoveryFile = path.join(campaignDir, '01-discovered.json');
+const qualifiedFile = path.join(campaignDir, '02-qualified.json');
+const sourcePreflightFile = path.join(campaignDir, 'source-preflight.json');
+const campaignPreflightFile = path.join(campaignDir, 'preflight.json');
+for (const file of [manifestFile, discoveryFile, qualifiedFile, sourcePreflightFile, campaignPreflightFile]) {
+  if (!(await exists(file))) fail(`${path.basename(file)} is missing. Complete campaign preflight and scheduling first.`);
+}
+
 const manifestText = await readFile(manifestFile, 'utf8');
 const manifest = JSON.parse(manifestText);
+const discovery = await readJson(discoveryFile);
+const qualified = await readJson(qualifiedFile);
+const sourcePreflight = await readJson(sourcePreflightFile);
+const campaignPreflight = await readJson(campaignPreflightFile);
+const config = await readJson(path.join(cwd, 'outreach', 'config.json'));
 const issues = [];
 const testMode = process.env.OUTREACH_TEST_MODE === '1';
 
-if (!testMode && manifest.production_ready_manifest !== true) issues.push('manifest is not marked production-ready');
-if (!testMode && manifest.production_source_eligible !== true) issues.push('manifest was not built from a production-eligible BuiltWith source');
+if (!testMode) {
+  if (manifest.production_ready_manifest !== true) issues.push('manifest is not marked production-ready');
+  if (manifest.production_source_eligible !== true) issues.push('manifest was not built from a production-eligible BuiltWith source');
+  if (discovery.production_eligible !== true) issues.push('current discovery file is not production-eligible');
+  if (discovery.source_provenance?.type !== 'BuiltWith Lists API' || discovery.source_provenance?.live_api !== true) issues.push('current discovery file is not from the authenticated live BuiltWith Lists API');
+  const maxSourceAge = Number(config.builtwith.source_pull_max_age_hours_for_qualification ?? 48);
+  if (ageHours(discovery.generated_at) > maxSourceAge) issues.push(`BuiltWith discovery pull is older than ${maxSourceAge} hours at provider load time`);
+}
+
+if (sourcePreflight.passed !== true || campaignPreflight.passed !== true) issues.push('source or campaign preflight is not currently passed');
 if (manifest.preflight_verified !== true || manifest.source_preflight_verified !== true) issues.push('manifest preflights are not verified');
 if (manifest.idempotency_keys_verified !== true) issues.push('manifest idempotency keys are not verified');
 if (manifest.message_count !== 125 || manifest.messages?.length !== 125) issues.push('manifest must contain exactly 125 messages');
 if (manifest.prospects !== 25) issues.push('manifest must contain exactly 25 prospects');
+if ((qualified.prospects ?? []).length !== 25) issues.push('qualified campaign must still contain exactly 25 prospects');
+
+const liveMaxAgeHours = Number(config.qualification.live_site_check_max_age_hours ?? 24);
+const emailMaxAgeHours = Number(config.qualification.contact_email_check_max_age_hours ?? 24);
+for (const prospect of qualified.prospects ?? []) {
+  if (ageHours(prospect.live_site_checked_at) > liveMaxAgeHours) issues.push(`${prospect.domain}: live-site verification is older than ${liveMaxAgeHours} hours at provider load time`);
+  if (ageHours(prospect.contact_email_verified_at) > emailMaxAgeHours) issues.push(`${prospect.domain}: public-email verification is older than ${emailMaxAgeHours} hours at provider load time`);
+}
 
 if (!provider.provider_name || !String(provider.provider_name).trim()) issues.push('provider_name missing');
 if (!validEmail(provider.sender_mailbox)) issues.push('sender_mailbox missing or invalid');
@@ -138,7 +171,7 @@ for (const message of manifest.messages ?? []) {
 if (messageKeys.size !== 125) issues.push(`expected 125 unique message keys, found ${messageKeys.size}`);
 if (sequenceTouches.size !== 25) issues.push(`expected 25 sequence keys, found ${sequenceTouches.size}`);
 for (const [sequenceKey, touches] of sequenceTouches.entries()) {
-  if (touches.size !== 5 || [...touches].sort().join(',') !== '1,2,3,4,5') issues.push(`sequence ${sequenceKey} does not contain exactly touches 1 through 5`);
+  if (touches.size !== 5 || [...touches].sort((a, b) => a - b).join(',') !== '1,2,3,4,5') issues.push(`sequence ${sequenceKey} does not contain exactly touches 1 through 5`);
 }
 for (const [email, sequences] of recipientSequences.entries()) if (sequences.size !== 1) issues.push(`${email}: recipient maps to multiple sequence keys`);
 
@@ -148,9 +181,9 @@ if (issues.length) {
   process.exit(1);
 }
 
-const outputFile = path.join(cwd, 'outreach', 'campaigns', week, '08-provider-preflight.json');
+const outputFile = path.join(campaignDir, '08-provider-preflight.json');
 const report = {
-  schema_version: 1,
+  schema_version: 2,
   campaign_week: week,
   generated_at: new Date().toISOString(),
   passed: true,
@@ -158,6 +191,8 @@ const report = {
   provider_name: provider.provider_name,
   sender_mailbox: provider.sender_mailbox,
   integration_tested_at: integration.tested_at,
+  source_rechecked_at_provider_load: true,
+  live_and_email_freshness_rechecked: true,
   messages_verified: 125,
   prospects_verified: 25,
   provider_config_sha256: sha256(providerText),
