@@ -13,6 +13,6 @@
     "outreach:schedule": "node scripts/outreach-schedule.mjs",
     "outreach:ledger-sync": "node scripts/outreach-ledger-sync.mjs",
     "outreach:provider-preflight": "node scripts/outreach-provider-full-preflight.mjs",
-    "outreach:test": "node scripts/test-outreach-system-v5.mjs && node scripts/test-outreach-ledger-duplicate.mjs && node scripts/test-outreach-provider-lifecycle.mjs && node scripts/test-outreach-provider-preflight.mjs"
+    "outreach:test": "node scripts/test-outreach-system-current.mjs && node scripts/test-outreach-theory-timing.mjs && node scripts/test-outreach-ledger-duplicate.mjs && node scripts/test-outreach-provider-lifecycle.mjs && node scripts/test-outreach-provider-time.mjs && node scripts/test-outreach-provider-preflight-current.mjs"
   }
 }
