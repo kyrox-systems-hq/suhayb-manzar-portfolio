@@ -1,10 +1,10 @@
 # Stage 6: Personalised Sequences and Scheduling
 
-Serial: WEBLEADS-STAGE6-20260808-003
+Serial: WEBLEADS-STAGE6-20260808-004
 
 ## Objective
 
-Write the complete five-touch sequence for all 25 prospects, ground every material claim in the research/mock-up evidence bank, then generate the reply-aware send manifest.
+Write the complete five-touch sequence for all 25 prospects, ground every material claim in the research/mock-up evidence bank, and bind the copy to the current weekly email-theory review before generating the reply-aware send manifest.
 
 Read:
 
@@ -25,7 +25,25 @@ npm run outreach:validate -- --week=<week>
 npm run outreach:schedule -- --week=<week>
 ```
 
-This creates `outreach/campaigns/<week>/07-send-manifest.json` only after source, evidence and campaign preflights pass.
+This creates `outreach/campaigns/<week>/07-send-manifest.json` only after source, theory, timing, evidence and campaign preflights pass.
+
+## Bind the sequences to the current theory review
+
+Read the `Reviewed:` date and `Review-ID:` from `05-email-standard.md` before writing any prospect email.
+
+At the top level of `06-sequences.json`, copy them exactly as:
+
+```json
+{
+  "schema_version": 3,
+  "campaign_week": "YYYY-MM-DD",
+  "email_standard_reviewed": "YYYY-MM-DD",
+  "email_standard_review_id": "WEBLEADS-EMAIL-...",
+  "sequences": []
+}
+```
+
+Campaign preflight rejects a sequence file that does not match the current theory review. If the email standard changes after the sequences are written, re-read it and re-confirm or rewrite the sequences before continuing.
 
 ## Sequence logic
 
@@ -96,11 +114,12 @@ For each prospect:
 - choose the preferred local send time using the campaign email standard and what is known about the recipient's role
 - record it as `preferred_local_send_time` in 24-hour `HH:MM` format
 - identify relevant public holidays or other known non-working dates that intersect the sequence and record them as ISO dates in `non_working_dates`
+- always include `non_working_dates` as an array, even when empty
 - if there is no evidence for a more precise time, omit `preferred_local_send_time` and let the scheduler use the configured local business-hours window
 
 The scheduler treats each follow-up as three recipient business days after the previous touch. It skips Saturdays, Sundays and the supplied `non_working_dates`.
 
-## Required JSON structure
+## Required sequence record
 
 Each sequence record must contain:
 
