@@ -1,10 +1,10 @@
 # Stage 3: Prospect Research and Commercial Diagnosis
 
-Serial: WEBLEADS-STAGE3-20260807-002
+Serial: WEBLEADS-STAGE3-20260808-003
 
 ## Objective
 
-Understand each of the 25 qualified businesses well enough to choose one demonstrable website intervention.
+Understand each of the 25 qualified businesses well enough to choose one demonstrable website intervention and create a sourced evidence bank for later outreach.
 
 Read:
 
@@ -37,7 +37,7 @@ Research only what improves the commercial diagnosis:
 - current company developments
 - recipient role and responsibilities where publicly evidenced
 
-Keep source URLs for factual claims and preserve the evidence in the dossier.
+Keep source URLs for every fact that may later appear in an outreach email.
 
 ## Diagnosis
 
@@ -50,9 +50,21 @@ Explain:
 - why it may matter commercially without inventing conversion rates or lost revenue
 - what the mock-up should change
 - which genuine public business assets can safely be used
-- two to four distinct observations that can later support different email touches
 
-Valid conversion surfaces include homepage, product page, collection page, paid-ad landing page, booking flow, quote request and lead-generation page.
+## Evidence bank
+
+Create at least three prospect-specific sourced evidence items.
+
+Each evidence item must have:
+
+- a unique stable ID such as `site-1`, `ads-1`, `business-1` or `customer-1`
+- a concise factual `claim`
+- one or more public `source_urls`
+- a `type`, for example website_observation, business_fact, advertising_signal, customer_feedback or contact_context
+
+Only put a claim in the evidence bank when the cited public source supports it.
+
+The email-writing stage may only cite evidence IDs from this bank plus the verified mock-up evidence created in Stage 4.
 
 ## Exact output contract
 
@@ -60,7 +72,7 @@ Valid conversion surfaces include homepage, product page, collection page, paid-
 
 ```json
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "campaign_week": "YYYY-MM-DD",
   "dossiers": [
     {
@@ -73,7 +85,15 @@ Valid conversion surfaces include homepage, product page, collection page, paid-
       "chosen_conversion_surface": "",
       "intervention_hypothesis": "",
       "genuine_assets_available": [""],
-      "outreach_relevant_observations": ["", ""]
+      "outreach_relevant_observations": ["", ""],
+      "evidence_bank": [
+        {
+          "id": "site-1",
+          "type": "website_observation",
+          "claim": "",
+          "source_urls": ["https://..."]
+        }
+      ]
     }
   ]
 }
