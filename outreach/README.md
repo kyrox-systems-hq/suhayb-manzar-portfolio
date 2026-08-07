@@ -1,6 +1,6 @@
 # Weekly Research-Led Website Outreach System
 
-Serial: WEBLEADS-SYSTEM-20260807-001
+Serial: WEBLEADS-SYSTEM-20260807-002
 
 This directory turns the portfolio outreach process into a weekly production system for 25 qualified businesses.
 
@@ -12,11 +12,12 @@ The CLI handles:
 
 - BuiltWith list ingestion and API discovery
 - duplicate exclusion against `public/mockups/_outreach-ledger.json`
-- campaign folders and persistent stage files
+- campaign folders and stage files
 - preliminary commercial scoring
 - stage validation
 - five-touch sequence timing
-- three-business-day follow-up spacing
+- three-recipient-business-day follow-up spacing
+- recipient timezone and known non-working dates
 - sequence QA rules
 - ledger synchronisation after qualification
 
@@ -44,6 +45,7 @@ Run the campaign at the weekend for the following Monday.
 7. Generate the send manifest.
 8. Load the manifest into a reply-aware outbound sequencer.
 9. Send five new prospects per working day.
+10. Review replies and commercial outcomes before changing the next campaign filters.
 
 The system does **not** automatically send emails. Sending is intentionally separated because the outbound provider must be authenticated, capable of stopping on reply, and configured with the correct mailbox, unsubscribe handling and jurisdictional requirements.
 
@@ -86,9 +88,10 @@ campaign.json
 05-email-standard.md
 06-sequences.json
 07-send-manifest.json
+08-results-review.md
 ```
 
-Operational campaign files should not be placed under `public/`.
+Operational campaign files should not be placed under `public/` and are gitignored because they contain prospect contact details, research dossiers and email copy.
 
 ## Commands
 
@@ -103,7 +106,11 @@ npm run outreach:ledger-sync -- --week=2026-08-10
 
 ## Stage prompts
 
-Use the prompts in `outreach/prompts/` in order.
+Start with:
+
+`outreach/prompts/00-weekly-orchestrator.md`
+
+Then run Stages 1 to 6 in order. Stage 7 is the post-campaign learning loop.
 
 Each stage must read the previous stage output and write its own handoff file. Do not combine stages merely to save time.
 
@@ -121,6 +128,8 @@ The final sequencer must stop remaining touches when any of these occurs:
 - manual commercial conversation
 
 Do not use ordinary scheduled-send functionality if it cannot reliably enforce those stop conditions.
+
+See `outreach/PROVIDER_CONTRACT.md` before connecting a sender.
 
 ## Cold-email baseline
 
