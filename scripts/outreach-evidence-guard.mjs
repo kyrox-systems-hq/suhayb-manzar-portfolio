@@ -48,6 +48,10 @@ function meaningful(value) {
   return typeof value === 'string' && value.trim().length >= 8;
 }
 
+function wordCount(value) {
+  return String(value ?? '').trim().split(/\s+/).filter(Boolean).length;
+}
+
 function tokens(text) {
   const stop = new Set(['the', 'a', 'an', 'and', 'or', 'to', 'of', 'in', 'for', 'is', 'it', 'this', 'that', 'i', 'you', 'your', 'with', 'on', 'if', 'can', 'into']);
   return new Set(String(text ?? '').toLowerCase().replace(/https?:\/\/\S+/g, ' ').replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter((token) => token.length > 2 && !stop.has(token)));
@@ -129,6 +133,10 @@ for (const sequence of sequences) {
   const usedAcrossSequence = new Set();
   const touches = sequence.touches ?? [];
   for (const touch of touches) {
+    const actualWords = wordCount(touch.body_text);
+    if (!Number.isInteger(touch.word_count) || touch.word_count !== actualWords) {
+      issues.push(`${domain}: touch ${touch.touch_number} word_count must equal the final body word count (${actualWords})`);
+    }
     if (!Array.isArray(touch.evidence_used) || touch.evidence_used.length === 0) {
       issues.push(`${domain}: touch ${touch.touch_number} has no evidence ids`);
       continue;
