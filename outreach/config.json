@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "campaign": {
     "qualified_target": 25,
     "discovery_pool_target": 50,
@@ -24,7 +24,15 @@
     },
     "sku_min": 10,
     "include_meta": true,
-    "max_pages_per_technology": 8
+    "max_pages_per_technology": 8,
+    "freshness": {
+      "preferred_last_detected_age_days": 14,
+      "max_last_detected_age_days": 30,
+      "max_future_clock_skew_hours": 24,
+      "require_last_detected": true,
+      "request_cache_control": "no-cache, no-store",
+      "request_pragma": "no-cache"
+    }
   },
   "qualification": {
     "weights": {
@@ -36,7 +44,9 @@
     },
     "verified_email_required": true,
     "website_problem_required": true,
-    "commercial_credibility_required": true
+    "commercial_credibility_required": true,
+    "fresh_live_site_check_required": true,
+    "live_site_check_max_age_hours": 24
   },
   "sequence": {
     "touches": 5,
