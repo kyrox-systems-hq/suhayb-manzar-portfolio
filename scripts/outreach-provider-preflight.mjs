@@ -11,12 +11,7 @@ function fail(message) {
 }
 
 async function exists(file) {
-  try {
-    await access(file);
-    return true;
-  } catch {
-    return false;
-  }
+  try { await access(file); return true; } catch { return false; }
 }
 
 async function readJson(file) {
@@ -53,13 +48,8 @@ function ageHours(value) {
   return Math.max(0, (Date.now() - new Date(value).valueOf()) / 3600000);
 }
 
-function ageDays(value) {
-  return ageHours(value) / 24;
-}
-
-function sha256(value) {
-  return createHash('sha256').update(value).digest('hex');
-}
+function ageDays(value) { return ageHours(value) / 24; }
+function sha256(value) { return createHash('sha256').update(value).digest('hex'); }
 
 const args = parseArgs(process.argv.slice(2));
 const week = mondayIso(args.week);
@@ -88,14 +78,18 @@ const campaignPreflight = await readJson(campaignPreflightFile);
 const config = await readJson(path.join(cwd, 'outreach', 'config.json'));
 const issues = [];
 const testMode = process.env.OUTREACH_TEST_MODE === '1';
+const sourceType = discovery.source_provenance?.type ?? discovery.source;
+const allowedSources = new Set(config.builtwith.production_source_modes ?? ['BuiltWith Lists API']);
 
 if (!testMode) {
   if (manifest.production_ready_manifest !== true) issues.push('manifest is not marked production-ready');
   if (manifest.production_source_eligible !== true) issues.push('manifest was not built from a production-eligible BuiltWith source');
   if (discovery.production_eligible !== true) issues.push('current discovery file is not production-eligible');
-  if (discovery.source_provenance?.type !== 'BuiltWith Lists API' || discovery.source_provenance?.live_api !== true) issues.push('current discovery file is not from the authenticated live BuiltWith Lists API');
+  if (!allowedSources.has(sourceType)) issues.push(`current discovery source ${sourceType ?? '(missing)'} is not approved for production`);
+  if (sourceType === 'BuiltWith Lists API' && discovery.source_provenance?.live_api !== true) issues.push('Lists API source is not marked live_api');
+  if (sourceType === 'BuiltWith Public Trends' && discovery.source_provenance?.live_public_web !== true) issues.push('public BuiltWith source is not marked live_public_web');
   const maxSourceAge = Number(config.builtwith.source_pull_max_age_hours_for_qualification ?? 48);
-  if (ageHours(discovery.generated_at) > maxSourceAge) issues.push(`BuiltWith discovery pull is older than ${maxSourceAge} hours at provider load time`);
+  if (ageHours(discovery.generated_at) > maxSourceAge) issues.push(`BuiltWith discovery source is older than ${maxSourceAge} hours at provider load time`);
 }
 
 if (sourcePreflight.passed !== true || campaignPreflight.passed !== true) issues.push('source or campaign preflight is not currently passed');
@@ -117,29 +111,16 @@ if (!validEmail(provider.sender_mailbox)) issues.push('sender_mailbox missing or
 if (!provider.sender_display_name || !String(provider.sender_display_name).trim()) issues.push('sender_display_name missing');
 if (!provider.physical_postal_address || String(provider.physical_postal_address).trim().length < 8) issues.push('physical_postal_address missing');
 if (!provider.unsubscribe_mode || String(provider.unsubscribe_mode).trim().length < 3) issues.push('unsubscribe_mode missing');
-if (!provider.credential_env_var || !/^[A-Z][A-Z0-9_]+$/.test(provider.credential_env_var)) {
-  issues.push('credential_env_var missing or invalid');
-} else if (!testMode && !process.env[provider.credential_env_var]) {
-  issues.push(`provider credential environment variable ${provider.credential_env_var} is not set`);
-}
+if (!provider.credential_env_var || !/^[A-Z][A-Z0-9_]+$/.test(provider.credential_env_var)) issues.push('credential_env_var missing or invalid');
+else if (!testMode && !process.env[provider.credential_env_var]) issues.push(`provider credential environment variable ${provider.credential_env_var} is not set`);
 
 const requiredCapabilities = [
-  'per_prospect_custom_content',
-  'recipient_timezone_scheduling',
-  'same_thread_followups',
-  'reply_detection',
-  'stop_on_reply',
-  'bounce_detection',
-  'stop_on_bounce',
-  'opt_out_detection',
-  'stop_on_opt_out',
-  'manual_pause',
-  'idempotent_import_or_send',
+  'per_prospect_custom_content', 'recipient_timezone_scheduling', 'same_thread_followups',
+  'reply_detection', 'stop_on_reply', 'bounce_detection', 'stop_on_bounce',
+  'opt_out_detection', 'stop_on_opt_out', 'manual_pause', 'idempotent_import_or_send',
   'delivery_status_export'
 ];
-for (const capability of requiredCapabilities) {
-  if (provider.capabilities?.[capability] !== true) issues.push(`provider capability not verified: ${capability}`);
-}
+for (const capability of requiredCapabilities) if (provider.capabilities?.[capability] !== true) issues.push(`provider capability not verified: ${capability}`);
 
 const integration = provider.integration_test ?? {};
 if (!validEmail(integration.test_recipient)) issues.push('integration test recipient missing or invalid');
@@ -161,7 +142,6 @@ for (const message of manifest.messages ?? []) {
   if (message.thread_mode !== 'same_thread') issues.push(`${message.domain}: provider manifest is not configured for same-thread follow-ups`);
   if (message.send_status !== 'planned') issues.push(`${message.domain} touch ${message.touch_number}: unexpected send_status ${message.send_status}`);
   for (const event of requiredStopEvents) if (!(message.stop_on ?? []).includes(event)) issues.push(`${message.domain} touch ${message.touch_number}: stop_on missing ${event}`);
-
   if (!sequenceTouches.has(message.sequence_key)) sequenceTouches.set(message.sequence_key, new Set());
   sequenceTouches.get(message.sequence_key).add(message.touch_number);
   if (!recipientSequences.has(message.recipient_email)) recipientSequences.set(message.recipient_email, new Set());
@@ -183,7 +163,7 @@ if (issues.length) {
 
 const outputFile = path.join(campaignDir, '08-provider-preflight.json');
 const report = {
-  schema_version: 2,
+  schema_version: 3,
   campaign_week: week,
   generated_at: new Date().toISOString(),
   passed: true,
@@ -191,6 +171,7 @@ const report = {
   provider_name: provider.provider_name,
   sender_mailbox: provider.sender_mailbox,
   integration_tested_at: integration.tested_at,
+  discovery_source_type: sourceType,
   source_rechecked_at_provider_load: true,
   live_and_email_freshness_rechecked: true,
   messages_verified: 125,
