@@ -116,13 +116,24 @@ function localTimeFor(sequence, index, config) {
 }
 
 async function verifyPreflight(dir) {
-  const preflightFile = path.join(dir, 'preflight.json');
-  if (!(await exists(preflightFile))) fail('preflight.json is missing. Run npm run outreach:validate before scheduling.');
-  const preflight = await readJson(preflightFile);
-  if (preflight.passed !== true) fail('Campaign preflight has not passed.');
+  const sourcePreflightFile = path.join(dir, 'source-preflight.json');
+  const campaignPreflightFile = path.join(dir, 'preflight.json');
+  if (!(await exists(sourcePreflightFile))) fail('source-preflight.json is missing. Run npm run outreach:validate before scheduling.');
+  if (!(await exists(campaignPreflightFile))) fail('preflight.json is missing. Run npm run outreach:validate before scheduling.');
+
+  const sourcePreflight = await readJson(sourcePreflightFile);
+  const campaignPreflight = await readJson(campaignPreflightFile);
+  if (sourcePreflight.passed !== true) fail('Source freshness preflight has not passed.');
+  if (campaignPreflight.passed !== true) fail('Campaign preflight has not passed.');
+
+  const discoveryFile = path.join(dir, '01-discovered.json');
+  const liveCheckedFile = path.join(dir, '01-live-checked.json');
+  if (!(await exists(discoveryFile)) || !(await exists(liveCheckedFile))) fail('Discovery/live-check source files are missing after source preflight.');
+  if (sourcePreflight.hashes?.discovery !== await digest(discoveryFile)) fail('Discovery data changed after source preflight. Re-run npm run outreach:validate.');
+  if (sourcePreflight.hashes?.liveChecked !== await digest(liveCheckedFile)) fail('Live-domain evidence changed after source preflight. Re-run npm run outreach:validate.');
 
   const files = {
-    liveChecked: path.join(dir, '01-live-checked.json'),
+    liveChecked: liveCheckedFile,
     qualified: path.join(dir, '02-qualified.json'),
     dossiers: path.join(dir, '03-dossiers.json'),
     mockups: path.join(dir, '04-mockups.json'),
@@ -130,11 +141,11 @@ async function verifyPreflight(dir) {
     sequences: path.join(dir, '06-sequences.json')
   };
   for (const [label, file] of Object.entries(files)) {
-    if (!(await exists(file))) fail(`${label} stage file is missing after preflight.`);
+    if (!(await exists(file))) fail(`${label} stage file is missing after campaign preflight.`);
     const current = await digest(file);
-    if (preflight.source_hashes?.[label] !== current) fail(`${label} stage changed after preflight. Re-run npm run outreach:validate.`);
+    if (campaignPreflight.source_hashes?.[label] !== current) fail(`${label} stage changed after campaign preflight. Re-run npm run outreach:validate.`);
   }
-  return preflight;
+  return { sourcePreflight, campaignPreflight };
 }
 
 function assignInitialDate(week, holidays, dailyCapacity, maxPerDay) {
@@ -153,7 +164,7 @@ function assignInitialDate(week, holidays, dailyCapacity, maxPerDay) {
 const week = parseWeek(process.argv.slice(2));
 const config = await readJson(path.join(cwd, 'outreach', 'config.json'));
 const campaignDir = path.join(cwd, 'outreach', 'campaigns', week);
-const preflight = await verifyPreflight(campaignDir);
+const { sourcePreflight, campaignPreflight } = await verifyPreflight(campaignDir);
 const sequenceFile = path.join(campaignDir, '06-sequences.json');
 const sequenceData = await readJson(sequenceFile);
 const sequences = sequenceData.sequences ?? [];
@@ -204,19 +215,22 @@ for (const [index, sequence] of sequences.entries()) {
 }
 
 const expectedMessages = config.campaign.qualified_target * config.sequence.touches;
-if (messages.length !== expectedMessages || preflight.expected_messages !== expectedMessages) fail(`Expected ${expectedMessages} validated messages, found ${messages.length}.`);
+if (messages.length !== expectedMessages || campaignPreflight.expected_messages !== expectedMessages) fail(`Expected ${expectedMessages} validated messages, found ${messages.length}.`);
 
 const manifestFile = path.join(campaignDir, '07-send-manifest.json');
 await writeJson(manifestFile, {
-  schema_version: 3,
+  schema_version: 4,
   campaign_week: week,
   generated_at: new Date().toISOString(),
   provider_status: 'not_loaded',
   sender_mailbox: null,
   reply_aware_provider_required: true,
+  source_preflight_verified: true,
+  source_preflight_generated_at: sourcePreflight.generated_at,
+  production_source_eligible: sourcePreflight.production_source_eligible,
   preflight_verified: true,
-  preflight_generated_at: preflight.generated_at,
-  freshness_preflight: preflight.freshness ?? null,
+  preflight_generated_at: campaignPreflight.generated_at,
+  freshness_preflight: campaignPreflight.freshness ?? null,
   message_count: messages.length,
   prospects: sequences.length,
   initial_touch_distribution: Object.fromEntries([...dailyInitialCapacity.entries()].sort()),
