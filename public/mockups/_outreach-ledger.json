@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "purpose": "Persistent exclusion and status ledger for automated research-led web outreach runs.",
-  "updated_at": "2026-08-08T09:14:23+05:00",
+  "updated_at": "2026-08-08T14:04:48+05:00",
   "entries": [
     {
       "business_name": "Patch & Bagel",
@@ -254,6 +254,34 @@
       "rejection_reason": null,
       "mockup_slug": "beyond-the-olive",
       "notes": "Passed the contact gate before mock-up work. The store reported a 30% sales decline after a theme change with traffic down only 5%, and specifically requested feedback on trust, homepage clarity, navigation and site density. Selected for a focused Triple Treat Gift Pack product-page concept because product-page purchase hierarchy and trust were repeatedly identified as conversion weaknesses."
+    },
+    {
+      "business_name": "Keep Recover",
+      "domain": "keeprecover.com",
+      "owner_or_contact": "Amiin, Founder / Shopify Community handle: keep_Recover",
+      "contact_email": null,
+      "email_source_url": null,
+      "source_post_url": "https://community.shopify.com/t/0-conversion-rate-418-sessions-but-no-sales-need-store-feedback/651768",
+      "source_platform": "Shopify Community",
+      "first_researched_at": "2026-08-08",
+      "status": "rejected",
+      "rejection_reason": "no_verified_email",
+      "mockup_slug": null,
+      "notes": "Recent conversion request with 418 sessions and zero sales. The official site contact page exposes a form and mentions email support but does not publish an exact address; targeted public searches did not surface an explicit public email. Rejected before any mock-up work."
+    },
+    {
+      "business_name": "Maison Myrthus",
+      "domain": "maisonmyrthus.ch",
+      "owner_or_contact": "Edith Sabiac / Shopify Community handle: Edith_Sabiac",
+      "contact_email": null,
+      "email_source_url": null,
+      "source_post_url": "https://community.shopify.com/t/roast-my-store-why-arent-people-adding-to-their-carts/660758",
+      "source_platform": "Shopify Community",
+      "first_researched_at": "2026-08-08",
+      "status": "rejected",
+      "rejection_reason": "no_verified_email",
+      "mockup_slug": null,
+      "notes": "Recent high-value Swiss gift-store conversion request with paid traffic and clear add-to-cart friction. Public business records and the live storefront identify Edith Sabiac and the company, but no exact public email address was found in the checked sources. A local business-directory listing also indicates the business does not want advertising. Rejected before any mock-up work."
     }
   ]
 }
