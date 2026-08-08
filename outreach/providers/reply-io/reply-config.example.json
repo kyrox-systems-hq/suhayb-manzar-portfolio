@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "provider": "Reply.io",
+  "api_base": "https://api.reply.io/v3",
+  "credential_env_var": "REPLY_API_KEY",
+  "email_account_id": null,
+  "schedule_id": null,
+  "sender_mailbox": "",
+  "sequence_name_prefix": "Suhayb Web Outreach",
+  "settings": {
+    "emails_count_per_day": 5,
+    "days_to_finish_prospect": 30,
+    "email_sending_delay_seconds": 60,
+    "daily_throttling": 5,
+    "disable_opens_tracking": true,
+    "enable_links_tracking": false,
+    "replies_handling_type": "MarkAsFinished"
+  }
+}
