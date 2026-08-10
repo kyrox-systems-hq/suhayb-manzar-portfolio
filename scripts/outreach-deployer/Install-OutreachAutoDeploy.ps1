@@ -45,6 +45,9 @@ if ($LASTEXITCODE -ne 0) {
     if ($LASTEXITCODE -ne 0) { throw 'GitHub authentication failed.' }
 }
 
+& gh auth refresh --hostname github.com --scopes repo
+if ($LASTEXITCODE -ne 0) { throw 'GitHub authentication does not have private-repository access.' }
+
 & gh auth setup-git
 if ($LASTEXITCODE -ne 0) { throw 'Could not configure Git to use GitHub authentication.' }
 
