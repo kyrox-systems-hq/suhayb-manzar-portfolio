@@ -90,8 +90,9 @@ $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-NoProfil
 $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(2) -RepetitionInterval (New-TimeSpan -Minutes 2)
 $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -RunOnlyIfNetworkAvailable -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Minutes 10)
 $currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+$principal = New-ScheduledTaskPrincipal -UserId $currentUser -LogonType Interactive -RunLevel Limited
 
-Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Settings $settings -User $currentUser -RunLevel Limited -Force | Out-Null
+Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Settings $settings -Principal $principal -Force | Out-Null
 
 Write-Host ''
 Write-Host 'Outreach auto-deployment is installed.'
