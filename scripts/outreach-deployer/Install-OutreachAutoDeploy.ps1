@@ -4,7 +4,8 @@ $Repo = 'kyrox-systems-hq/suhayb-manzar-portfolio'
 $Branch = 'agent/weekly-outreach-system'
 $Root = Join-Path $env:LOCALAPPDATA 'Kyrox\outreach-deployer'
 $RepoDir = Join-Path $Root 'repo'
-$FirebaseExe = Join-Path $Root 'firebase.exe'
+$FirebaseCliDir = Join-Path $Root 'firebase-cli'
+$FirebaseCmd = Join-Path $FirebaseCliDir 'node_modules\.bin\firebase.cmd'
 $Watcher = Join-Path $RepoDir 'scripts\outreach-deployer\Watch-OutreachDeploy.ps1'
 $TaskName = 'Kyrox Outreach Auto Deploy'
 
@@ -38,6 +39,12 @@ New-Item -ItemType Directory -Path $Root -Force | Out-Null
 
 Ensure-WingetPackage -Command 'git' -PackageId 'Git.Git'
 Ensure-WingetPackage -Command 'gh' -PackageId 'GitHub.cli'
+Ensure-WingetPackage -Command 'node' -PackageId 'OpenJS.NodeJS.LTS'
+Refresh-Path
+
+if (-not (Get-Command npm.cmd -ErrorAction SilentlyContinue)) {
+    throw 'npm is not available after Node.js installation. Reopen PowerShell and run this installer again.'
+}
 
 & gh auth status --hostname github.com *> $null
 if ($LASTEXITCODE -ne 0) {
@@ -64,17 +71,20 @@ else {
     if ($LASTEXITCODE -ne 0) { throw 'Repository reset failed.' }
 }
 
-Invoke-WebRequest -Uri 'https://firebase.tools/bin/win/instant/latest' -OutFile $FirebaseExe
-if (-not (Test-Path $FirebaseExe)) { throw 'Firebase CLI download failed.' }
+New-Item -ItemType Directory -Path $FirebaseCliDir -Force | Out-Null
+& npm.cmd install --prefix $FirebaseCliDir firebase-tools@latest --no-audit --no-fund
+if ($LASTEXITCODE -ne 0 -or -not (Test-Path $FirebaseCmd)) {
+    throw 'Firebase CLI npm installation failed.'
+}
 
-& $FirebaseExe projects:list --non-interactive *> $null
+& $FirebaseCmd projects:list --non-interactive *> $null
 if ($LASTEXITCODE -ne 0) {
     Write-Host 'A browser will open once so Firebase can authorise this PC.'
-    & $FirebaseExe login
+    & $FirebaseCmd login
     if ($LASTEXITCODE -ne 0) { throw 'Firebase login failed.' }
 }
 
-$projects = (& $FirebaseExe projects:list --json | Out-String)
+$projects = (& $FirebaseCmd projects:list --json | Out-String)
 if ($LASTEXITCODE -ne 0 -or $projects -notmatch 'suhayb-manzar-portfolio') {
     throw 'This Firebase login cannot access suhayb-manzar-portfolio.'
 }
