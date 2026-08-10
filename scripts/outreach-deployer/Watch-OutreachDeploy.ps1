@@ -7,11 +7,44 @@ $StateFile = Join-Path $Root 'last-deployed-marker.txt'
 $LogFile = Join-Path $Root 'deploy.log'
 $Repo = 'kyrox-systems-hq/suhayb-manzar-portfolio'
 $Branch = 'agent/weekly-outreach-system'
+$StatusPath = 'public/mockups/.deploy-status'
 
 function Write-DeployLog {
     param([string]$Message)
     $line = "{0} {1}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'), $Message
     Add-Content -Path $LogFile -Value $line
+}
+
+function Publish-DeployStatus {
+    param(
+        [string]$MarkerSha,
+        [string]$DeployedAtUtc
+    )
+
+    $statusContent = @"
+status=success
+marker_sha=$MarkerSha
+deployed_at_utc=$DeployedAtUtc
+firebase_project=suhayb-manzar-portfolio
+"@
+    $encoded = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($statusContent))
+    $statusSha = (& gh api "repos/$Repo/contents/$StatusPath?ref=$([uri]::EscapeDataString($Branch))" --jq '.sha' 2>$null | Out-String).Trim()
+
+    $args = @(
+        'api', "repos/$Repo/contents/$StatusPath",
+        '--method', 'PUT',
+        '-f', 'message=Record successful outreach deployment',
+        '-f', "content=$encoded",
+        '-f', "branch=$Branch"
+    )
+    if ($statusSha) {
+        $args += @('-f', "sha=$statusSha")
+    }
+
+    & gh @args *> $null
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Could not publish deployment acknowledgement to GitHub.'
+    }
 }
 
 try {
@@ -55,7 +88,9 @@ try {
         Pop-Location
     }
 
+    $deployedAtUtc = (Get-Date).ToUniversalTime().ToString('o')
     Set-Content -Path $StateFile -Value $markerSha -Encoding utf8
+    Publish-DeployStatus -MarkerSha $markerSha -DeployedAtUtc $deployedAtUtc
     Write-DeployLog "Deployment succeeded for marker: $markerSha"
 }
 catch {
