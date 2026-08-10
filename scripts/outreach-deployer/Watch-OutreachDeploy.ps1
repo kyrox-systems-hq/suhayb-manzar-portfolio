@@ -1,6 +1,6 @@
 $ErrorActionPreference = 'Stop'
 
-$Root = 'C:\outreach-deployer'
+$Root = Join-Path $env:LOCALAPPDATA 'Kyrox\outreach-deployer'
 $RepoDir = Join-Path $Root 'repo'
 $FirebaseExe = Join-Path $Root 'firebase.exe'
 $StateFile = Join-Path $Root 'last-deployed-marker.txt'
