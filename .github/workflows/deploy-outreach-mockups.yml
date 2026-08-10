@@ -5,10 +5,7 @@ on:
     branches:
       - agent/weekly-outreach-system
     paths:
-      - 'public/mockups/**'
-      - 'firebase.json'
-      - '.firebaserc'
-      - '.github/workflows/deploy-outreach-mockups.yml'
+      - 'public/mockups/.deploy-ready'
 
 concurrency:
   group: firebase-outreach-live
