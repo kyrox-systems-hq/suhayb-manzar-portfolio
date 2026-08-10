@@ -11,6 +11,7 @@ const FIREBASE_CMD = path.join(ROOT, 'firebase-cli', 'node_modules', '.bin', 'fi
 const STATE_FILE = path.join(ROOT, 'last-deployed-marker.txt');
 const STOP_FILE = path.join(ROOT, 'STOP');
 const LOG_FILE = path.join(ROOT, 'deploy.log');
+const PID_FILE = path.join(ROOT, 'watcher.pid');
 
 const BRANCH = 'agent/weekly-outreach-system';
 const PROJECT_ID = 'suhayb-manzar-portfolio';
@@ -129,6 +130,17 @@ async function deployIfNeeded() {
 
 process.on('uncaughtException', (error) => log(`UNCAUGHT: ${error.stack || error.message || error}`));
 process.on('unhandledRejection', (error) => log(`UNHANDLED: ${error && error.stack ? error.stack : error}`));
+
+fs.mkdirSync(ROOT, { recursive: true });
+fs.writeFileSync(PID_FILE, `${process.pid}\r\n`, 'utf8');
+
+function clearPid() {
+  try { fs.rmSync(PID_FILE, { force: true }); } catch {}
+}
+
+process.on('exit', clearPid);
+process.on('SIGTERM', () => { clearPid(); process.exit(0); });
+process.on('SIGINT', () => { clearPid(); process.exit(0); });
 
 log('Watcher started.');
 deployIfNeeded();
