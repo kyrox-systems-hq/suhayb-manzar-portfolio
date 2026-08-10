@@ -21,6 +21,7 @@ const WATCHER_SOURCE = path.join(REPO_DIR, 'scripts', 'outreach-deployer', 'Watc
 const STATE_FILE = path.join(ROOT, 'last-deployed-marker.txt');
 const STOP_FILE = path.join(ROOT, 'STOP');
 const LOG_FILE = path.join(ROOT, 'final-repair.log');
+const PID_FILE = path.join(ROOT, 'watcher.pid');
 const STARTUP_VBS = path.join(appData, 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'Startup', 'Kyrox-Outreach-AutoDeploy.vbs');
 
 const MARKER_REL = 'public/mockups/.deploy-ready';
@@ -68,6 +69,15 @@ function removeOldAutomation() {
   run('schtasks.exe', ['/Delete', '/TN', OLD_TASK, '/F']);
   try { fs.rmSync(STARTUP_VBS, { force: true }); } catch {}
   try { fs.writeFileSync(STOP_FILE, 'stop\r\n', 'utf8'); } catch {}
+
+  try {
+    const pid = Number(fs.readFileSync(PID_FILE, 'utf8').trim());
+    if (Number.isInteger(pid) && pid > 0) {
+      run('taskkill.exe', ['/PID', String(pid), '/F']);
+    }
+  } catch {}
+
+  try { fs.rmSync(PID_FILE, { force: true }); } catch {}
 }
 
 function cleanRoot() {
