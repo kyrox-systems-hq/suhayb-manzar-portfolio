@@ -2,7 +2,8 @@ $ErrorActionPreference = 'Stop'
 
 $Root = Join-Path $env:LOCALAPPDATA 'Kyrox\outreach-deployer'
 $RepoDir = Join-Path $Root 'repo'
-$FirebaseExe = Join-Path $Root 'firebase.exe'
+$FirebaseCliDir = Join-Path $Root 'firebase-cli'
+$FirebaseCmd = Join-Path $FirebaseCliDir 'node_modules\.bin\firebase.cmd'
 $StateFile = Join-Path $Root 'last-deployed-marker.txt'
 $LogFile = Join-Path $Root 'deploy.log'
 $Repo = 'kyrox-systems-hq/suhayb-manzar-portfolio'
@@ -49,7 +50,7 @@ firebase_project=suhayb-manzar-portfolio
 
 try {
     if (-not (Test-Path $RepoDir)) { throw "Repository checkout not found at $RepoDir" }
-    if (-not (Test-Path $FirebaseExe)) { throw "Firebase CLI not found at $FirebaseExe" }
+    if (-not (Test-Path $FirebaseCmd)) { throw "npm Firebase CLI not found at $FirebaseCmd" }
     if (-not (Get-Command gh -ErrorAction SilentlyContinue)) { throw 'GitHub CLI (gh) is not available.' }
     if (-not (Get-Command git -ErrorAction SilentlyContinue)) { throw 'Git is not available.' }
 
@@ -81,7 +82,7 @@ try {
 
     Push-Location $RepoDir
     try {
-        & $FirebaseExe deploy --only hosting --project suhayb-manzar-portfolio --non-interactive
+        & $FirebaseCmd deploy --only hosting --project suhayb-manzar-portfolio --non-interactive
         if ($LASTEXITCODE -ne 0) { throw 'Firebase Hosting deployment failed.' }
     }
     finally {
