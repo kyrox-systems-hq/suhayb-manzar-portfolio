@@ -1,0 +1,32 @@
+name: Deploy outreach mock-ups
+
+on:
+  push:
+    branches:
+      - agent/weekly-outreach-system
+    paths:
+      - 'public/mockups/**'
+      - 'firebase.json'
+      - '.firebaserc'
+      - '.github/workflows/deploy-outreach-mockups.yml'
+
+concurrency:
+  group: firebase-outreach-live
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Deploy Firebase Hosting live
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_SUHAYB_MANZAR_PORTFOLIO }}'
+          projectId: suhayb-manzar-portfolio
+          channelId: live
