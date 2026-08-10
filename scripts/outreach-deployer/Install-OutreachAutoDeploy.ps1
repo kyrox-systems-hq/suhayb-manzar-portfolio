@@ -2,7 +2,7 @@ $ErrorActionPreference = 'Stop'
 
 $Repo = 'kyrox-systems-hq/suhayb-manzar-portfolio'
 $Branch = 'agent/weekly-outreach-system'
-$Root = 'C:\outreach-deployer'
+$Root = Join-Path $env:LOCALAPPDATA 'Kyrox\outreach-deployer'
 $RepoDir = Join-Path $Root 'repo'
 $FirebaseExe = Join-Path $Root 'firebase.exe'
 $Watcher = Join-Path $RepoDir 'scripts\outreach-deployer\Watch-OutreachDeploy.ps1'
@@ -83,7 +83,6 @@ if (-not (Test-Path $Watcher)) {
     throw "Watcher script not found at $Watcher"
 }
 
-# Run once immediately. With no saved marker this performs an initial deployment and proves the setup works.
 & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $Watcher
 if ($LASTEXITCODE -ne 0) {
     throw "Initial deployment failed. Check $Root\deploy.log"
